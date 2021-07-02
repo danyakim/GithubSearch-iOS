@@ -22,6 +22,7 @@ class AboutTableViewCell: UITableViewCell {
   // MARK: - Properties
   private let imageLoader = ImageLoader()
   private var subscriptions = Set<AnyCancellable>()
+  private var urlString: String?
   
   // MARK: - Initializers
   required init(avatarLink: String,
@@ -34,14 +35,19 @@ class AboutTableViewCell: UITableViewCell {
     self.ownerName.text = ownerName
     self.repoName.text = repoName
     self.about.text = about
-    if let link = link,
-       !link.isEmpty {
-      self.link.text = "🔗 " + link
-    }
     self.stars.text = "⭐ " + stars.formatUsingAbbreviation()
     self.forks.text = "⑂ " + forks.formatUsingAbbreviation()
     
     super.init(style: .default, reuseIdentifier: nil)
+    
+    if let link = link,
+       !link.isEmpty {
+      self.urlString = link
+      self.link.text = "🔗 " + link
+      self.link.isUserInteractionEnabled = true
+      self.link.addGestureRecognizer(UITapGestureRecognizer(target: self,
+                                                            action: #selector(openLink)))
+    }
     
     loadAvatar(from: avatarLink)
     setupUI()
@@ -108,6 +114,12 @@ class AboutTableViewCell: UITableViewCell {
         self?.avatar.image = image
       }
       .store(in: &subscriptions)
+  }
+  
+  @objc private func openLink() {
+    guard let urlString = urlString,
+          let url = URL(string: urlString) else { return }
+    UIApplication.shared.open(url, options: [:], completionHandler: nil)
   }
   
 }

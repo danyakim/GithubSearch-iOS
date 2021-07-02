@@ -47,6 +47,11 @@ class SearchTableVC: UITableViewController {
   }
   
   private func setupLoadingIndicator() {
+    let spinner = UIActivityIndicatorView(style: .medium)
+    spinner.startAnimating()
+    spinner.frame = CGRect(x: CGFloat(0), y: CGFloat(0), width: tableView.bounds.width, height: 44)
+    tableView.tableFooterView = spinner
+    
     viewModel.$isLoading
       .receive(on: DispatchQueue.main)
       .sink { [weak self] shouldLoad in
@@ -57,11 +62,6 @@ class SearchTableVC: UITableViewController {
   
   private func showLoadingIndicator(_ shouldShow: Bool) {
     if shouldShow {
-      let spinner = UIActivityIndicatorView(style: .medium)
-      spinner.startAnimating()
-      spinner.frame = CGRect(x: CGFloat(0), y: CGFloat(0), width: tableView.bounds.width, height: CGFloat(44))
-      
-      tableView.tableFooterView = spinner
       tableView.tableFooterView?.isHidden = false
     } else {
       tableView.tableFooterView?.isHidden = true
