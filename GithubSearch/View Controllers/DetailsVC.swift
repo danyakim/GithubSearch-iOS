@@ -16,6 +16,7 @@ class DetailsVC: UITableViewController {
   // MARK: - Initializers
   init(resultItem: ResultItem) {
     self.resultItem = resultItem
+    
     super.init(style: .plain)
   }
   
@@ -47,16 +48,17 @@ class DetailsVC: UITableViewController {
   
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     if indexPath.row == 0 {
-      let aboutCell = AboutTableViewCell(avatarLink: resultItem.owner.avatarURL,
-                                         ownerName: resultItem.owner.login,
-                                         repoName: resultItem.fullName,
-                                         about: resultItem.itemDescription,
-                                         link: resultItem.homepage,
-                                         stars: resultItem.stargazersCount,
-                                         forks: resultItem.forksCount)
-      return aboutCell
+      
     }
     switch indexPath.row {
+    case 0:
+      return AboutTableViewCell(avatarLink: resultItem.owner.avatarURL,
+                                ownerName: resultItem.owner.login,
+                                repoName: resultItem.fullName,
+                                about: resultItem.itemDescription,
+                                link: resultItem.homepage,
+                                stars: resultItem.stargazersCount,
+                                forks: resultItem.forksCount)
     case 1:
       return DetailTableViewCell(image: UIImage(systemName: "smallcircle.fill.circle"),
                                  cellName: "Issues",
@@ -66,9 +68,9 @@ class DetailsVC: UITableViewController {
                                  cellName: "Watchers",
                                  details: String(resultItem.watchersCount))
     case 3:
-      return DetailTableViewCell(image: UIImage(systemName: "smallcircle.fill.circle"),
-                                 cellName: "Issues",
-                                 details: String(resultItem.openIssuesCount))
+      return DetailTableViewCell(image: UIImage(systemName: "book"),
+                                 cellName: "Licence",
+                                 details: String(resultItem.license?.name ?? "No License"))
     default:
       fatalError("unknown number of rows in static tableView")
     }

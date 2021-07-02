@@ -13,6 +13,7 @@ class ResultsVM {
   // MARK: - Properties
   
   @Published private(set) var results = [ResultItem]()
+  @Published private(set) var isLoading = false
   
   private(set) var search = CurrentValueSubject<String, Never>("")
   private(set) var selectedRow = PassthroughSubject<Int, Never>()
@@ -45,6 +46,7 @@ class ResultsVM {
       .sink { [weak self] page in
         guard let self = self else { return }
         if page != 1, self.totalCount <= self.results.count { return }
+        self.isLoading = true
         self.getResults(for: self.search.value, page: page)
       }
       .store(in: &subscriptions)
@@ -73,6 +75,7 @@ class ResultsVM {
               let items = receivedResult.items else { return }
         self.totalCount = totalCount
         self.results += items
+        self.isLoading = false
       }
       .store(in: &subscriptions)
   }
