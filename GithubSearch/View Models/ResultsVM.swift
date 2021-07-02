@@ -31,13 +31,14 @@ class ResultsVM {
   public func startReacting() {
     search
       .dropFirst()
-      .filter { !$0.isEmpty }
       .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
       .removeDuplicates()
       .sink { [weak self] searchText in
         guard let self = self else { return }
         self.results = []
-        self.page.send(1)
+        if !searchText.isEmpty {
+          self.page.send(1)
+        }
       }
       .store(in: &subscriptions)
     

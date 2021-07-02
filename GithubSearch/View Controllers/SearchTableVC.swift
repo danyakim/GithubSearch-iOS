@@ -124,12 +124,14 @@ class SearchTableVC: UITableViewController {
     }
   }
   
-  // MARK: - scrollView
+  // MARK: - ScrollViewDelegate
   override func scrollViewDidScroll(_ scrollView: UIScrollView) {
     searchBar.resignFirstResponder()
   }
+  
 }
 
+// MARK: - SearchBarDelegate
 extension SearchTableVC: UISearchBarDelegate {
   
   func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
