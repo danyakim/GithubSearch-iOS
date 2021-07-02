@@ -15,12 +15,12 @@ class ResultsVM {
   @Published private(set) var results = [ResultItem]()
   @Published private(set) var isLoading = false
   
+  private(set) var errorReceived = PassthroughSubject<GithubError, Never>()
   private(set) var search = CurrentValueSubject<String, Never>("")
   private(set) var selectedRow = PassthroughSubject<Int, Never>()
   
   private var totalCount = 0
   private var page = CurrentValueSubject<Int, Never>(1)
-  
   private var subscriptions = Set<AnyCancellable>()
   private var network = GithubAPI()
   
@@ -62,12 +62,9 @@ class ResultsVM {
   
   public func getResults(for string: String, page: Int = 1) {
     network.getSearchResults(for: string, on: page)
-      .sink { completion in
-        switch completion {
-        case .finished:
-          print("Got results")
-        case .failure(let error):
-          print("Failed fetching results for '\(string)' error: \(error.localizedDescription)")
+      .sink { [weak self] completion in
+        if case let .failure(error) = completion {
+          self?.errorReceived.send(error)
         }
       } receiveValue: { [weak self] receivedResult in
         guard let self = self,

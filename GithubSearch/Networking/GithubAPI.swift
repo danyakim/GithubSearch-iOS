@@ -9,19 +9,19 @@ import Foundation
 import Combine
 
 enum GithubError: Error, CustomStringConvertible {
-  case badURL(String)
-  case network(String)
-  case parsing(String)
+  case badURL
+  case network
+  case parsing
   case unknown
   
   var description: String {
     switch self {
-    case .badURL(let string):
-      return "Couldn't form URL from string: \(string)"
-    case .network(let string):
-      return "Request to API failed\(string)"
-    case .parsing(let string):
-      return "Failed parsing response:\(string)"
+    case .badURL:
+      return "Couldn't form URL from string"
+    case .network:
+      return "Network Error"
+    case .parsing:
+      return "Failed parsing response"
     default:
       return "Unknown Error"
     }
@@ -40,7 +40,7 @@ class GithubAPI {
     
     guard let url = URL(string: urlString) else {
       return Future { promise in
-        promise(.failure(GithubError.badURL(urlString)))
+        promise(.failure(GithubError.badURL))
       }
     }
     return Future { promise in
@@ -48,14 +48,13 @@ class GithubAPI {
         .dataTaskPublisher(for: url)
         .map(\.data)
         .decode(type: SearchResult.self, decoder: JSONDecoder())
-//        .print()
         .sink { completion in
           if case let .failure(error) = completion {
             switch error {
-            case let urlError as URLError:
-              promise(.failure(GithubError.network(urlError.localizedDescription)))
-            case let decodingError as DecodingError:
-              promise(.failure(GithubError.parsing(decodingError.localizedDescription)))
+            case is URLError:
+              promise(.failure(GithubError.network))
+            case is DecodingError:
+              promise(.failure(GithubError.parsing))
             default:
               promise(.failure(GithubError.unknown))
             }

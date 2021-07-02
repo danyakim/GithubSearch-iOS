@@ -28,6 +28,7 @@ class SearchTableVC: UITableViewController {
     setupSearchBar()
     reloadTableViewOnResult()
     setupLoadingIndicator()
+    setupErrorAlert()
     viewModel.startReacting()
   }
   
@@ -66,6 +67,22 @@ class SearchTableVC: UITableViewController {
     } else {
       tableView.tableFooterView?.isHidden = true
     }
+  }
+  
+  private func setupErrorAlert() {
+    viewModel.errorReceived
+      .receive(on: DispatchQueue.main)
+      .sink { [weak self] error in
+        self?.presentAlert(message: error.description)
+      }
+      .store(in: &subscriptions)
+  }
+  
+  private func presentAlert(message: String) {
+    let alert = UIAlertController(title: "Oops", message: message, preferredStyle: .alert)
+    let action = UIAlertAction(title: "Ok", style: .cancel, handler: nil)
+    alert.addAction(action)
+    present(alert, animated: true, completion: nil)
   }
   
   // MARK: - Table view data source
