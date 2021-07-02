@@ -23,13 +23,11 @@ class SearchTableVC: UITableViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    viewModel.coordinator = coordinator
-    
     tableView.estimatedRowHeight = 88
+    
     setupSearchBar()
-    reloadTableViewOnResult()
+    reactToNewResults()
     setupLoadingIndicator()
-    setupErrorAlert()
     viewModel.startReacting()
   }
   
@@ -39,10 +37,14 @@ class SearchTableVC: UITableViewController {
     searchBar.delegate = self
   }
   
-  private func reloadTableViewOnResult() {
-    viewModel.$results
+  private func reactToNewResults() {
+    viewModel.results
       .receive(on: DispatchQueue.main)
-      .sink { [weak self] _ in
+      .sink { [weak self] completion in
+        if case let .failure(error) = completion {
+          self?.presentAlert(message: error.description)
+        }
+      } receiveValue: { [weak self] _ in
         self?.tableView.reloadData()
       }
       .store(in: &subscriptions)
@@ -53,8 +55,9 @@ class SearchTableVC: UITableViewController {
     spinner.startAnimating()
     spinner.frame = CGRect(x: CGFloat(0), y: CGFloat(0), width: tableView.bounds.width, height: 44)
     tableView.tableFooterView = spinner
+    tableView.tableFooterView?.isHidden = true
     
-    viewModel.$isLoading
+    viewModel.isLoading
       .receive(on: DispatchQueue.main)
       .sink { [weak self] shouldLoad in
         self?.showLoadingIndicator(shouldLoad)
@@ -68,15 +71,6 @@ class SearchTableVC: UITableViewController {
     } else {
       tableView.tableFooterView?.isHidden = true
     }
-  }
-  
-  private func setupErrorAlert() {
-    viewModel.errorReceived
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] error in
-        self?.presentAlert(message: error.description)
-      }
-      .store(in: &subscriptions)
   }
   
   private func presentAlert(message: String) {
@@ -93,7 +87,7 @@ class SearchTableVC: UITableViewController {
   
   override func tableView(_ tableView: UITableView,
                           numberOfRowsInSection section: Int) -> Int {
-    return viewModel.results.count
+    return viewModel.results.value.count
   }
   
   // MARK: - Table view delegate
@@ -104,7 +98,7 @@ class SearchTableVC: UITableViewController {
   
   override func tableView(_ tableView: UITableView,
                           cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let result = viewModel.results[indexPath.row]
+    let result = viewModel.results.value[indexPath.row]
     let cell = ResultTableViewCell(name: result.fullName,
                                    about: result.itemDescription,
                                    stars: result.stargazersCount,
@@ -115,11 +109,13 @@ class SearchTableVC: UITableViewController {
   
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     tableView.deselectRow(at: indexPath, animated: true)
-    viewModel.selectedRow.send(indexPath.row)
+    
+    let result = viewModel.results.value[indexPath.row]
+    coordinator?.showDetails(for: result)
   }
   
   override func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-    if indexPath.row == viewModel.results.count - 1 {
+    if indexPath.row == viewModel.results.value.count - 1 {
       viewModel.incrementPage()
     }
   }

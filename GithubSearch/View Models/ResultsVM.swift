@@ -12,19 +12,14 @@ class ResultsVM {
   
   // MARK: - Properties
   
-  @Published private(set) var results = [ResultItem]()
-  @Published private(set) var isLoading = false
-  
-  private(set) var errorReceived = PassthroughSubject<GithubError, Never>()
-  private(set) var search = CurrentValueSubject<String, Never>("")
-  private(set) var selectedRow = PassthroughSubject<Int, Never>()
+  var results = CurrentValueSubject<[ResultItem], GithubError>([])
+  var search = CurrentValueSubject<String, Never>("")
+  var isLoading = PassthroughSubject<Bool, Never>()
   
   private var totalCount = 0
   private var page = CurrentValueSubject<Int, Never>(1)
   private var subscriptions = Set<AnyCancellable>()
   private var network = GithubAPI()
-  
-  weak var coordinator: MainCoordinator?
   
   // MARK: - Methods
   
@@ -35,7 +30,8 @@ class ResultsVM {
       .removeDuplicates()
       .sink { [weak self] searchText in
         guard let self = self else { return }
-        self.results = []
+        
+        self.results.value = []
         if !searchText.isEmpty {
           self.page.send(1)
         }
@@ -46,16 +42,9 @@ class ResultsVM {
       .dropFirst()
       .sink { [weak self] page in
         guard let self = self else { return }
-        if page != 1, self.totalCount <= self.results.count { return }
-        self.isLoading = true
+        if page != 1, self.totalCount <= self.results.value.count { return }
+        self.isLoading.send(true)
         self.getResults(for: self.search.value, page: page)
-      }
-      .store(in: &subscriptions)
-    
-    selectedRow
-      .sink { [weak self] row in
-        guard let self = self else { return }
-        self.coordinator?.showDetails(for: self.results[row])
       }
       .store(in: &subscriptions)
       
@@ -65,21 +54,21 @@ class ResultsVM {
     network.getSearchResults(for: string, on: page)
       .sink { [weak self] completion in
         if case let .failure(error) = completion {
-          self?.errorReceived.send(error)
+          self?.results.send(completion: .failure(error))
         }
       } receiveValue: { [weak self] receivedResult in
         guard let self = self,
               let totalCount = receivedResult.totalCount,
               let items = receivedResult.items else { return }
         self.totalCount = totalCount
-        self.results += items
-        self.isLoading = false
+        self.results.value += items
+        self.isLoading.send(false)
       }
       .store(in: &subscriptions)
   }
   
   public func resultHasDescription(at index: Int) -> Bool {
-    return results[index].itemDescription != nil
+    return results.value[index].itemDescription != nil
   }
   
   public func incrementPage() {

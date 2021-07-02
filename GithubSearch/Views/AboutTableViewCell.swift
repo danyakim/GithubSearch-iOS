@@ -57,7 +57,6 @@ class AboutTableViewCell: UITableViewCell {
     fatalError("init(coder:) has not been implemented")
   }
   
-  
   // MARK: - Private methods
   private func setupUI() {
     setupLayout()
@@ -115,7 +114,6 @@ class AboutTableViewCell: UITableViewCell {
   
   private func loadAvatar(from link: String) {
     imageLoader.load(from: link)
-    imageLoader.$image
       .sink { [weak self] image in
         self?.avatar.image = image
       }

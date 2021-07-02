@@ -30,7 +30,7 @@ class DetailsVC: UITableViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    ///remove extra lines after last cell
+    // remove extra lines after last cell
     tableView.tableFooterView = UIView()
   }
   
@@ -49,9 +49,6 @@ class DetailsVC: UITableViewController {
   }
   
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    if indexPath.row == 0 {
-      
-    }
     switch indexPath.row {
     case 0:
       return AboutTableViewCell(avatarLink: resultItem.owner.avatarURL,

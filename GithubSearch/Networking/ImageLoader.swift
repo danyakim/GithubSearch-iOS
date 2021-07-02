@@ -11,20 +11,14 @@ import Combine
 
 class ImageLoader {
   
-  @Published var image: UIImage?
-  private var subscription: AnyCancellable?
-  
-  func load(from urlString: String) {
-    guard let url = URL(string: urlString) else { return }
-    subscription = URLSession.shared
+  func load(from urlString: String) -> AnyPublisher<UIImage, Never> {
+    guard let url = URL(string: urlString) else { return Empty().eraseToAnyPublisher() }
+    return URLSession.shared
       .dataTaskPublisher(for: url)
-      .map(\.data )
-      .map { UIImage(data: $0) ?? UIImage() }
+      .map { UIImage(data: $0.data) ?? UIImage() }
       .receive(on: DispatchQueue.main)
       .replaceError(with: UIImage())
-      .sink { [weak self] image in
-        self?.image = image
-      }
+      .eraseToAnyPublisher()
   }
   
 }
