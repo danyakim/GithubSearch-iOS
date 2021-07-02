@@ -18,6 +18,8 @@ class DetailsVC: UITableViewController {
     self.resultItem = resultItem
     
     super.init(style: .plain)
+    
+    title = resultItem.name
   }
   
   required init?(coder: NSCoder) {
@@ -43,7 +45,7 @@ class DetailsVC: UITableViewController {
   
   // MARK: - Table view delegate
   override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-    indexPath.row == 0 ? 220 : 44
+    return UITableView.automaticDimension
   }
   
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

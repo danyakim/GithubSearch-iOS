@@ -25,6 +25,7 @@ class SearchTableVC: UITableViewController {
     
     viewModel.coordinator = coordinator
     
+    tableView.estimatedRowHeight = 88
     setupSearchBar()
     reloadTableViewOnResult()
     setupLoadingIndicator()

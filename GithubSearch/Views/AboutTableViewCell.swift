@@ -64,6 +64,12 @@ class AboutTableViewCell: UITableViewCell {
     configureViews()
   }
   
+  @objc private func openLink() {
+    guard let urlString = urlString,
+          let url = URL(string: urlString) else { return }
+    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+  }
+  
   private func setupLayout() {
     let ownerStack = UIStackView(arrangedSubviews: [avatar, ownerName])
     ownerStack.configure(axis: .horizontal, spacing: 10, alignment: .top)
@@ -114,12 +120,6 @@ class AboutTableViewCell: UITableViewCell {
         self?.avatar.image = image
       }
       .store(in: &subscriptions)
-  }
-  
-  @objc private func openLink() {
-    guard let urlString = urlString,
-          let url = URL(string: urlString) else { return }
-    UIApplication.shared.open(url, options: [:], completionHandler: nil)
   }
   
 }
