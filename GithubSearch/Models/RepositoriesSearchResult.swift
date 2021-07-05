@@ -8,9 +8,9 @@
 import Foundation
 
 // MARK: - SearchResult
-struct SearchResult: Codable {
+struct SearchResult<T: Codable>: Codable {
   let totalCount: Int?
-  let items: [ResultItem]?
+  let items: [T]?
   
   enum CodingKeys: String, CodingKey {
     case totalCount = "total_count"
@@ -19,10 +19,10 @@ struct SearchResult: Codable {
 }
 
 // MARK: - ResultItem
-struct ResultItem: Codable {
+class Repository: Codable {
   let name: String
   let fullName: String
-  let owner: Owner
+  let owner: User
   let itemDescription: String?
   let url: String
   let updatedAt: String
@@ -63,7 +63,7 @@ struct License: Codable {
 }
 
 // MARK: - Owner
-struct Owner: Codable {
+class User: Codable {
   let login: String
   let avatarURL: String
   

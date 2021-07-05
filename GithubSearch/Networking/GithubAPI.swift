@@ -35,15 +35,26 @@ class GithubAPI {
   private var subscriptions = Set<AnyCancellable>()
   
   // MARK: - Public methods
-  public func getSearchResults(for string: String, on page: Int) -> Future<SearchResult, GithubError> {
+  public func getRepositories(for string: String, on page: Int)
+  -> Future<SearchResult<Repository>, GithubError> {
     let urlString = baseURL + "/search/repositories?q=\(string)&page=\(String(page))"
     
-    guard let url = URL(string: urlString) else {
-      return Future { promise in
-        promise(.failure(GithubError.badURL))
-      }
-    }
+    return makeRequest(for: urlString)
+  }
+  
+  public func getUsers(for string: String, on page: Int)
+  -> Future<SearchResult<User>, GithubError> {
+    let urlString = baseURL + "/search/users?q=\(string)&page=\(String(page))"
+    
+    return makeRequest(for: urlString)
+  }
+  
+  // MARK: - Private Methods
+  private func makeRequest<T: Codable>(for urlString: String) -> Future<SearchResult<T>, GithubError> {
     return Future { promise in
+      guard let url = URL(string: urlString) else {
+        return promise(.failure(GithubError.badURL))
+      }
       URLSession.shared
         .dataTaskPublisher(for: url)
         .map(\.data)
@@ -65,4 +76,5 @@ class GithubAPI {
         .store(in: &self.subscriptions)
     }
   }
+  
 }

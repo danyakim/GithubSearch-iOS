@@ -1,14 +1,14 @@
 //
-//  MainCoordinator.swift
+//  RepositoriesCoordinator.swift
 //  GithubSearch
 //
-//  Created by Daniil Kim on 01.07.2021.
+//  Created by Daniil Kim on 02.07.2021.
 //
 
 import Foundation
 import UIKit
 
-class MainCoordinator: Coordinator {
+class RepositoriesCoordinator: Coordinator {
   var childCoordinators: [Coordinator] = []
   
   var navigationController: UINavigationController
@@ -18,12 +18,16 @@ class MainCoordinator: Coordinator {
   }
   
   func start() {
-    let vc = SearchTableVC()
+    let vc = SearchRepositoriesVC(viewModel: RepositoriesVM())
     vc.coordinator = self
+    
+    navigationController.tabBarItem.title = "Repositories"
+    navigationController.tabBarItem.image = UIImage(systemName: "book.closed.fill")
+    
     navigationController.pushViewController(vc, animated: false)
   }
   
-  func showDetails(for resultItem: ResultItem) {
+  func showDetails(for resultItem: Repository) {
     let vc = DetailsVC(resultItem: resultItem)
     vc.coordinator = self
     navigationController.pushViewController(vc, animated: true)

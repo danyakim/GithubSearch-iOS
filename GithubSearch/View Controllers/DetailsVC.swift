@@ -10,11 +10,11 @@ import UIKit
 class DetailsVC: UITableViewController {
   
   // MARK: - Properties
-  weak var coordinator: MainCoordinator?
-  var resultItem: ResultItem
+  weak var coordinator: RepositoriesCoordinator?
+  var resultItem: Repository
   
   // MARK: - Initializers
-  init(resultItem: ResultItem) {
+  init(resultItem: Repository) {
     self.resultItem = resultItem
     
     super.init(style: .plain)

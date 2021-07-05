@@ -21,7 +21,7 @@ class AboutTableViewCell: UITableViewCell {
   
   // MARK: - Properties
   private let imageLoader = ImageLoader()
-  private var subscriptions = Set<AnyCancellable>()
+  private var loader: AnyCancellable?
   private var urlString: String?
   
   // MARK: - Initializers
@@ -113,11 +113,10 @@ class AboutTableViewCell: UITableViewCell {
   }
   
   private func loadAvatar(from link: String) {
-    imageLoader.load(from: link)
+    loader = imageLoader.load(from: link)
       .sink { [weak self] image in
         self?.avatar.image = image
       }
-      .store(in: &subscriptions)
   }
   
 }
