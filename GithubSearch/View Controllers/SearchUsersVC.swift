@@ -13,7 +13,7 @@ class SearchUsersVC: SearchVCModel<UsersVM> {
   // MARK: - Properties
   weak var coordinator: UsersCoordinator?
   let imageLoader = ImageLoader()
-  var imageLoaders = [Int: AnyCancellable]()
+  var loaders = [Int: AnyCancellable]()
   
   // MARK: - Methods
   override func viewDidLoad() {
@@ -53,6 +53,10 @@ extension SearchUsersVC: UITableViewDelegate {
     if indexPath.row == viewModel.results.value.count - 1 {
       viewModel.incrementPage()
     }
+  }
+  
+  func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+    loaders[indexPath.row]?.cancel()
   }
   
   func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
