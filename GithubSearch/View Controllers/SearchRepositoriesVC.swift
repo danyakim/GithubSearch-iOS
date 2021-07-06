@@ -17,6 +17,8 @@ class SearchRepositoriesVC: SearchVCModel<RepositoriesVM> {
     
     tableView.delegate = self
     tableView.dataSource = self
+    
+    tableView.register(cellClass: RepositoryTableViewCell.self)
   }
   
 }
@@ -41,12 +43,13 @@ extension SearchRepositoriesVC: UITableViewDelegate {
   
   func tableView(_ tableView: UITableView,
                  cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let result = viewModel.results.value[indexPath.row]
-    let cell = ResultTableViewCell(name: result.fullName,
-                                   about: result.itemDescription,
-                                   stars: result.stargazersCount,
-                                   language: result.language,
-                                   lastUpdated: result.updatedAt)
+    let repository = viewModel.results.value[indexPath.row]
+    let cell = tableView.dequeue(cellClass: RepositoryTableViewCell.self, for: indexPath)
+    cell.configure(with: RepositoryTableViewCellData(name: repository.fullName,
+                                                     about: repository.itemDescription,
+                                                     stars: repository.stargazersCount,
+                                                     language: repository.language,
+                                                     lastUpdated: repository.updatedAt))
     return cell
   }
   

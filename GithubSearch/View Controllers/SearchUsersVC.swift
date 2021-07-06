@@ -12,8 +12,6 @@ class SearchUsersVC: SearchVCModel<UsersVM> {
   
   // MARK: - Properties
   weak var coordinator: UsersCoordinator?
-  let imageLoader = ImageLoader()
-  var loaders = [Int: AnyCancellable]()
   
   // MARK: - Methods
   override func viewDidLoad() {
@@ -21,6 +19,8 @@ class SearchUsersVC: SearchVCModel<UsersVM> {
     
     tableView.delegate = self
     tableView.dataSource = self
+    
+    tableView.register(cellClass: UserTableViewCell.self)
   }
   
 }
@@ -44,8 +44,9 @@ extension SearchUsersVC: UITableViewDelegate {
   
   func tableView(_ tableView: UITableView,
                  cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let result = viewModel.results.value[indexPath.row]
-    let cell = UserTableViewCell(avatarURL: result.avatarURL, name: result.login)
+    let user = viewModel.results.value[indexPath.row]
+    let cell = tableView.dequeue(cellClass: UserTableViewCell.self, for: indexPath)
+    cell.configure(with: UserTableViewCellData(name: user.login, avatarURL: user.avatarURL))
     return cell
   }
   
@@ -53,10 +54,6 @@ extension SearchUsersVC: UITableViewDelegate {
     if indexPath.row == viewModel.results.value.count - 1 {
       viewModel.incrementPage()
     }
-  }
-  
-  func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-    loaders[indexPath.row]?.cancel()
   }
   
   func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {

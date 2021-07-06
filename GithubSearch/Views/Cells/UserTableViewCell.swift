@@ -8,29 +8,49 @@
 import UIKit
 import Combine
 
+// MARK: - Cell Data
+struct UserTableViewCellData {
+  let name: String
+  let avatarURL: String
+}
+
 class UserTableViewCell: UITableViewCell {
+  
+  // MARK: - Properties
+  let defaultImage = UIImage(systemName: "person.fill")
   
   private let imageLoader = ImageLoader()
   private var loader: AnyCancellable?
   
-  required init(avatarURL: String,
-                name: String) {
-    super.init(style: .default, reuseIdentifier: nil)
-    
-    textLabel?.text = name
-    
+  // MARK: - Initializers
+  
+  override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    super.init(style: style, reuseIdentifier: reuseIdentifier)
     setupViews()
-    imageView?.image = UIImage(systemName: "person.fill")
-    loader = imageLoader.load(from: avatarURL)
-      .sink { [weak self] image in
-        self?.imageView?.image = image
-      }
   }
   
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
   
+  // MARK: - Lifecycle
+  override func prepareForReuse() {
+    configure(with: nil)
+  }
+  
+  // MARK: - Public methods
+  public func configure(with data: UserTableViewCellData?) {
+    guard let data = data else {
+      textLabel?.text = nil
+      imageView?.image = defaultImage
+      return
+    }
+    loader?.cancel()
+    loadImage(from: data.avatarURL)
+    textLabel?.text = data.name
+  }
+  
+  // MARK: - Private methods
   private func setupViews() {
     imageView?.anchor(top: contentView.topAnchor,
                       leading: contentView.leadingAnchor,
@@ -43,6 +63,14 @@ class UserTableViewCell: UITableViewCell {
     textLabel?.anchor(leading: imageView?.trailingAnchor,
                       centerY: contentView.centerYAnchor,
                       padding: UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0))
+    
+    imageView?.image = defaultImage
   }
   
+  private func loadImage(from link: String) {
+    loader = imageLoader.load(from: link)
+      .sink { [weak self] image in
+        self?.imageView?.image = image
+      }
+  }
 }

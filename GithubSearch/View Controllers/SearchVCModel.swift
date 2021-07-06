@@ -10,8 +10,8 @@ import UIKit
 import Combine
 
 class SearchVCModel<VMType: ResultsVM>: UIViewController,
-                                            UIScrollViewDelegate,
-                                            UISearchBarDelegate {
+                                        UIScrollViewDelegate,
+                                        UISearchBarDelegate {
   
   // MARK: - UIViews
   private let searchBar = UISearchBar()
