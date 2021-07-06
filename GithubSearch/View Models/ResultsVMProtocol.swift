@@ -1,5 +1,5 @@
 //
-//  ResultsVM.swift
+//  ResultsVMProtocol.swift
 //  GithubSearch
 //
 //  Created by Daniil Kim on 05.07.2021.
@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-protocol ResultsVM: AnyObject {
+protocol ResultsVMProtocol: AnyObject {
   
   // MARK: - Properties
   var search: CurrentValueSubject<String, Never> { get }
@@ -26,8 +26,7 @@ protocol ResultsVM: AnyObject {
   func getResults(for string: String, page: Int)
 }
 
-extension ResultsVM {
-  
+extension ResultsVMProtocol {
   func startReacting() {
     search
       .dropFirst()

@@ -13,7 +13,7 @@ class SearchUsersVC: UIViewController,
   
   // MARK: - Properties
   var tableView = UITableView()
-  var viewModel: ResultsVM = UsersVM()
+  var viewModel = UsersVM()
   var subscriptions = Set<AnyCancellable>()
   
   var searchBar = UISearchBar()
@@ -24,7 +24,8 @@ class SearchUsersVC: UIViewController,
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    defaultSetup()
+    setupViews()
+    setupViewModel()
     
     tableView.delegate = self
     tableView.dataSource = self
@@ -32,8 +33,18 @@ class SearchUsersVC: UIViewController,
     tableView.register(cellClass: UserTableViewCell.self)
   }
   
+  func setupViewModel() {
+    viewModel.startReacting()
+    
+    viewModel.isLoading
+      .receive(on: DispatchQueue.main)
+      .sink { [weak self] shouldLoad in
+        self?.showLoadingIndicator(shouldLoad)
+      }
+      .store(in: &subscriptions)
+  }
+  
   func reactToNewResults() {
-    guard let viewModel = viewModel as? UsersVM else { fatalError("Wrong View Model") }
     viewModel.results
       .receive(on: DispatchQueue.main)
       .sink { [weak self] completion in
@@ -66,7 +77,6 @@ class SearchUsersVC: UIViewController,
 extension SearchUsersVC: UITableViewDataSource {
   
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    guard let viewModel = viewModel as? UsersVM else { fatalError("Wrong View Model") }
     return viewModel.results.value.count
   }
   
@@ -82,7 +92,6 @@ extension SearchUsersVC: UITableViewDelegate {
   
   func tableView(_ tableView: UITableView,
                  cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    guard let viewModel = viewModel as? UsersVM else { fatalError("Wrong View Model") }
     let user = viewModel.results.value[indexPath.row]
     let cell = tableView.dequeue(cellClass: UserTableViewCell.self, for: indexPath)
     cell.configure(with: UserTableViewCellData(name: user.login, avatarURL: user.avatarURL))
@@ -90,7 +99,6 @@ extension SearchUsersVC: UITableViewDelegate {
   }
   
   func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-    guard let viewModel = viewModel as? UsersVM else { fatalError("Wrong View Model") }
     if indexPath.row == viewModel.results.value.count - 1 {
       viewModel.incrementPage()
     }

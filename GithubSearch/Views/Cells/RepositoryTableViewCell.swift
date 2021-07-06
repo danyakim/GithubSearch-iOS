@@ -27,7 +27,6 @@ class RepositoryTableViewCell: UITableViewCell {
   
   // MARK: - Initializers
   override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-    print("init")
     super.init(style: style, reuseIdentifier: reuseIdentifier)
     setupViews()
   }

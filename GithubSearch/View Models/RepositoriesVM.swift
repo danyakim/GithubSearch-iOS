@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-class RepositoriesVM: ResultsVM {
+class RepositoriesVM: ResultsVMProtocol {
   
   // MARK: - Properties
   var results = CurrentValueSubject<[Repository], GithubError>([])

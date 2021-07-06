@@ -15,7 +15,7 @@
 		3B7D3B71268F667A00920771 /* UsersVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D3B70268F667A00920771 /* UsersVM.swift */; };
 		3B7D3B73268F6A2800920771 /* RepositoriesCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D3B72268F6A2800920771 /* RepositoriesCoordinator.swift */; };
 		3B7D3B75268F6A3400920771 /* UsersCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D3B74268F6A3400920771 /* UsersCoordinator.swift */; };
-		3B7D3B772692EDCA00920771 /* ResultsVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D3B762692EDCA00920771 /* ResultsVM.swift */; };
+		3B7D3B772692EDCA00920771 /* ResultsVMProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D3B762692EDCA00920771 /* ResultsVMProtocol.swift */; };
 		3B7D3B7A269303A100920771 /* SearchVCModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D3B79269303A100920771 /* SearchVCModel.swift */; };
 		3B7D3B7C269318AF00920771 /* UserTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D3B7B269318AF00920771 /* UserTableViewCell.swift */; };
 		3B7D3B7E2693562900920771 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D3B7D2693562900920771 /* ReusableView.swift */; };
@@ -48,7 +48,7 @@
 		3B7D3B70268F667A00920771 /* UsersVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsersVM.swift; sourceTree = "<group>"; };
 		3B7D3B72268F6A2800920771 /* RepositoriesCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoriesCoordinator.swift; sourceTree = "<group>"; };
 		3B7D3B74268F6A3400920771 /* UsersCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsersCoordinator.swift; sourceTree = "<group>"; };
-		3B7D3B762692EDCA00920771 /* ResultsVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsVM.swift; sourceTree = "<group>"; };
+		3B7D3B762692EDCA00920771 /* ResultsVMProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsVMProtocol.swift; sourceTree = "<group>"; };
 		3B7D3B79269303A100920771 /* SearchVCModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchVCModel.swift; sourceTree = "<group>"; };
 		3B7D3B7B269318AF00920771 /* UserTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserTableViewCell.swift; sourceTree = "<group>"; };
 		3B7D3B7D2693562900920771 /* ReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableView.swift; sourceTree = "<group>"; };
@@ -171,7 +171,7 @@
 		3BF1FD26268C757800B4FB7E /* View Models */ = {
 			isa = PBXGroup;
 			children = (
-				3B7D3B762692EDCA00920771 /* ResultsVM.swift */,
+				3B7D3B762692EDCA00920771 /* ResultsVMProtocol.swift */,
 				3BF1FD2F268C7B9100B4FB7E /* RepositoriesVM.swift */,
 				3B7D3B70268F667A00920771 /* UsersVM.swift */,
 			);
@@ -333,7 +333,7 @@
 				3BF1FD2B268C765200B4FB7E /* SearchRepositoriesVC.swift in Sources */,
 				3BF1FD44268E0BB900B4FB7E /* AboutTableViewCell.swift in Sources */,
 				3BF1FD34268C836700B4FB7E /* GithubAPI.swift in Sources */,
-				3B7D3B772692EDCA00920771 /* ResultsVM.swift in Sources */,
+				3B7D3B772692EDCA00920771 /* ResultsVMProtocol.swift in Sources */,
 				3BF1FD36268C8CF900B4FB7E /* RepositoryTableViewCell.swift in Sources */,
 				3B7D3B71268F667A00920771 /* UsersVM.swift in Sources */,
 				3BF1FD32268C7EA400B4FB7E /* RepositoriesSearchResult.swift in Sources */,

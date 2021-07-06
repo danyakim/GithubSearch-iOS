@@ -12,7 +12,7 @@ class SearchRepositoriesVC: UIViewController,
                             SearchVCModel {
   // MARK: - Properties
   var tableView = UITableView()
-  var viewModel: ResultsVM = RepositoriesVM()
+  var viewModel = RepositoriesVM()
   var subscriptions = Set<AnyCancellable>()
   
   var searchBar = UISearchBar()
@@ -23,16 +23,27 @@ class SearchRepositoriesVC: UIViewController,
   override func viewDidLoad() {
     super.viewDidLoad()
     
-    defaultSetup()
+    setupViews()
+    setupViewModel()
     
     tableView.delegate = self
     tableView.dataSource = self
     
     tableView.register(cellClass: RepositoryTableViewCell.self)
   }
+  
+  func setupViewModel() {
+    viewModel.startReacting()
+    
+    viewModel.isLoading
+      .receive(on: DispatchQueue.main)
+      .sink { [weak self] shouldLoad in
+        self?.showLoadingIndicator(shouldLoad)
+      }
+      .store(in: &subscriptions)
+  }
  
   func reactToNewResults() {
-    guard let viewModel = viewModel as? RepositoriesVM else { fatalError("Wrong View Model") }
     viewModel.results
       .receive(on: DispatchQueue.main)
       .sink { [weak self] completion in
@@ -65,7 +76,6 @@ extension SearchRepositoriesVC: UITableViewDataSource {
   
   func tableView(_ tableView: UITableView,
                  numberOfRowsInSection section: Int) -> Int {
-    guard let viewModel = viewModel as? RepositoriesVM else { fatalError("Wrong View Model") }
     return viewModel.results.value.count
   }
   
@@ -76,13 +86,11 @@ extension SearchRepositoriesVC: UITableViewDelegate {
   
   func tableView(_ tableView: UITableView,
                  heightForRowAt indexPath: IndexPath) -> CGFloat {
-    guard let viewModel = viewModel as? RepositoriesVM else { fatalError("Wrong View Model") }
     return viewModel.resultHasDescription(at: indexPath.row) ? 88 : 66
   }
   
   func tableView(_ tableView: UITableView,
                  cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    guard let viewModel = viewModel as? RepositoriesVM else { fatalError("Wrong View Model") }
     let repository = viewModel.results.value[indexPath.row]
     let cell = tableView.dequeue(cellClass: RepositoryTableViewCell.self, for: indexPath)
     cell.configure(with: RepositoryTableViewCellData(name: repository.fullName,
@@ -94,7 +102,6 @@ extension SearchRepositoriesVC: UITableViewDelegate {
   }
   
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    guard let viewModel = viewModel as? RepositoriesVM else { fatalError("Wrong View Model") }
     tableView.deselectRow(at: indexPath, animated: true)
     
     let result = viewModel.results.value[indexPath.row]
@@ -102,7 +109,6 @@ extension SearchRepositoriesVC: UITableViewDelegate {
   }
   
   func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-    guard let viewModel = viewModel as? RepositoriesVM else { fatalError("Wrong View Model") }
     if indexPath.row == viewModel.results.value.count - 1 {
       viewModel.incrementPage()
     }

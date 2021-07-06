@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-class UsersVM: ResultsVM {
+class UsersVM: ResultsVMProtocol {
   
   // MARK: - ResultsVM
   var results = CurrentValueSubject<[User], GithubError>([])

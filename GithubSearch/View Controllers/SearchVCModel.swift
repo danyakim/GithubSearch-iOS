@@ -15,11 +15,11 @@ protocol SearchVCModel: UIViewController,
   // MARK: - Properties
   var searchBar: UISearchBar { get }
   var tableView: UITableView { get }
-  var viewModel: ResultsVM { get }
   var subscriptions: Set<AnyCancellable> { get set }
   
   // MARK: - Methods
-  func defaultSetup()
+  func setupViewModel()
+  func setupViews()
   func setupTableView()
   func setupSearchBar()
   func reactToNewResults()
@@ -32,12 +32,11 @@ protocol SearchVCModel: UIViewController,
 // MARK: - Default Implementation
 extension SearchVCModel {
   
-  func defaultSetup() {
+  func setupViews() {
     setupTableView()
     setupSearchBar()
     reactToNewResults()
     setupLoadingIndicator()
-    viewModel.startReacting()
   }
   
   func setupTableView() {
@@ -60,13 +59,6 @@ extension SearchVCModel {
     spinner.frame = CGRect(x: CGFloat(0), y: CGFloat(0), width: tableView.bounds.width, height: 44)
     tableView.tableFooterView = spinner
     tableView.tableFooterView?.isHidden = true
-    
-    viewModel.isLoading
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] shouldLoad in
-        self?.showLoadingIndicator(shouldLoad)
-      }
-      .store(in: &subscriptions)
   }
   
   func showLoadingIndicator(_ shouldShow: Bool) {
