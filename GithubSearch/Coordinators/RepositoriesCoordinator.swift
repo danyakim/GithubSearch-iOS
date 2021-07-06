@@ -18,7 +18,7 @@ class RepositoriesCoordinator: Coordinator {
   }
   
   func start() {
-    let vc = SearchRepositoriesVC(viewModel: RepositoriesVM())
+    let vc = SearchRepositoriesVC()
     vc.coordinator = self
     
     navigationController.tabBarItem.title = "Repositories"

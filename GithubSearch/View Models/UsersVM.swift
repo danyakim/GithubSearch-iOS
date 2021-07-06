@@ -11,8 +11,7 @@ import Combine
 class UsersVM: ResultsVM {
   
   // MARK: - ResultsVM
-  typealias GithubResult = User
-  var results = CurrentValueSubject<[GithubResult], GithubError>([])
+  var results = CurrentValueSubject<[User], GithubError>([])
   var search = CurrentValueSubject<String, Never>("")
   var isLoading = PassthroughSubject<Bool, Never>()
   
@@ -23,6 +22,13 @@ class UsersVM: ResultsVM {
   let network = GithubAPI()
   
   // MARK: - Methods
+  func eraseResults() {
+    results.send([])
+  }
+  
+  func count() -> Int {
+    results.value.count
+  }
   
   func getResults(for string: String, page: Int = 1) {
     network.getUsers(for: string, on: page)

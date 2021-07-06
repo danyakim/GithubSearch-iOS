@@ -11,8 +11,6 @@ import Combine
 protocol ResultsVM: AnyObject {
   
   // MARK: - Properties
-  associatedtype GithubResult
-  var results: CurrentValueSubject<[GithubResult], GithubError> { get }
   var search: CurrentValueSubject<String, Never> { get }
   var page: CurrentValueSubject<Int, Never> { get }
   var isLoading: PassthroughSubject<Bool, Never> { get }
@@ -21,6 +19,8 @@ protocol ResultsVM: AnyObject {
   
   // MARK: - Methods
   
+  func eraseResults()
+  func count() -> Int
   func startReacting()
   func incrementPage()
   func getResults(for string: String, page: Int)
@@ -36,7 +36,7 @@ extension ResultsVM {
       .sink { [weak self] searchText in
         guard let self = self else { return }
         
-        self.results.value = []
+        self.eraseResults()
         if !searchText.isEmpty {
           self.page.send(1)
         }
@@ -47,7 +47,7 @@ extension ResultsVM {
       .dropFirst()
       .sink { [weak self] page in
         guard let self = self else { return }
-        if page != 1, self.totalCount <= self.results.value.count { return }
+        if page != 1, self.totalCount <= self.count() { return }
         self.isLoading.send(true)
         self.getResults(for: self.search.value, page: page)
       }

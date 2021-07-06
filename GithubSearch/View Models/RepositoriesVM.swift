@@ -11,8 +11,7 @@ import Combine
 class RepositoriesVM: ResultsVM {
   
   // MARK: - Properties
-  typealias GithubResult = Repository
-  var results = CurrentValueSubject<[GithubResult], GithubError>([])
+  var results = CurrentValueSubject<[Repository], GithubError>([])
   var search = CurrentValueSubject<String, Never>("")
   var isLoading = PassthroughSubject<Bool, Never>()
   
@@ -23,6 +22,14 @@ class RepositoriesVM: ResultsVM {
   let network = GithubAPI()
   
   // MARK: - Methods
+  func eraseResults() {
+    results.send([])
+  }
+  
+  func count() -> Int {
+    results.value.count
+  }
+  
   func getResults(for string: String, page: Int = 1) {
     network.getRepositories(for: string, on: page)
       .sink { [weak self] completion in
