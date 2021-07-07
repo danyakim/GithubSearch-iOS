@@ -12,11 +12,11 @@ class SearchUsersVC: UIViewController,
                      SearchVCModel {
   
   // MARK: - Properties
+  var searchBar = UISearchBar()
   var tableView = UITableView()
-  var viewModel = UsersVM()
   var subscriptions = Set<AnyCancellable>()
   
-  var searchBar = UISearchBar()
+  var viewModel = ResultsVM<User>()
   
   weak var coordinator: UsersCoordinator?
   
@@ -87,14 +87,15 @@ extension SearchUsersVC: UITableViewDelegate {
   
   func tableView(_ tableView: UITableView,
                  heightForRowAt indexPath: IndexPath) -> CGFloat {
-    return 66
+    return UITableView.automaticDimension
   }
   
   func tableView(_ tableView: UITableView,
                  cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let user = viewModel.results.value[indexPath.row]
     let cell = tableView.dequeue(cellClass: UserTableViewCell.self, for: indexPath)
-    cell.configure(with: UserTableViewCellData(name: user.login, avatarURL: user.avatarURL))
+    cell.configure(with: UserTableViewCellData(name: user.login,
+                                               avatarURL: user.avatarURL))
     return cell
   }
   

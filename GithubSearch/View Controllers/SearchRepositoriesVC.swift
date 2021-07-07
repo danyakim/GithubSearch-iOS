@@ -11,11 +11,11 @@ import Combine
 class SearchRepositoriesVC: UIViewController,
                             SearchVCModel {
   // MARK: - Properties
+  var searchBar = UISearchBar()
   var tableView = UITableView()
-  var viewModel = RepositoriesVM()
   var subscriptions = Set<AnyCancellable>()
   
-  var searchBar = UISearchBar()
+  var viewModel = ResultsVM<Repository>()
   
   weak var coordinator: RepositoriesCoordinator?
   
@@ -86,7 +86,7 @@ extension SearchRepositoriesVC: UITableViewDelegate {
   
   func tableView(_ tableView: UITableView,
                  heightForRowAt indexPath: IndexPath) -> CGFloat {
-    return viewModel.resultHasDescription(at: indexPath.row) ? 88 : 66
+    return UITableView.automaticDimension
   }
   
   func tableView(_ tableView: UITableView,
