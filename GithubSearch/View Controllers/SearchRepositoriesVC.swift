@@ -10,12 +10,13 @@ import Combine
 
 class SearchRepositoriesVC: UIViewController,
                             SearchVCModel {
+  
   // MARK: - Properties
   var searchBar = UISearchBar()
   var tableView = UITableView()
-  var subscriptions = Set<AnyCancellable>()
   
   var viewModel = ResultsVM<Repository>()
+  var subscriptions = Set<AnyCancellable>()
   
   weak var coordinator: RepositoriesCoordinator?
   
@@ -30,44 +31,6 @@ class SearchRepositoriesVC: UIViewController,
     tableView.dataSource = self
     
     tableView.register(cellClass: RepositoryTableViewCell.self)
-  }
-  
-  func setupViewModel() {
-    viewModel.startReacting()
-    
-    viewModel.isLoading
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] shouldLoad in
-        self?.showLoadingIndicator(shouldLoad)
-      }
-      .store(in: &subscriptions)
-  }
- 
-  func reactToNewResults() {
-    viewModel.results
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] completion in
-        if case let .failure(error) = completion {
-          self?.presentAlert(message: error.description)
-        }
-      } receiveValue: { [weak self] results in
-        guard let self = self else { return }
-        guard !results.isEmpty else { return self.tableView.reloadData() }
-        
-        let count = results.count
-        if count % 30 == 0 {
-          let indexPaths = (count - 30 ... count - 1).reduce([]) { indexes, row in
-            return indexes + [IndexPath(row: row, section: 0)]
-          }
-          self.tableView.insertRows(at: indexPaths, with: .automatic)
-        } else {
-          let indexPaths = (count - (count % 30) ... count - 1).reduce([]) { indexes, row in
-            return indexes + [IndexPath(row: row, section: 0)]
-          }
-          self.tableView.insertRows(at: indexPaths, with: .automatic)
-        }
-      }
-      .store(in: &subscriptions)
   }
 }
 
@@ -110,7 +73,7 @@ extension SearchRepositoriesVC: UITableViewDelegate {
   
   func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
     if indexPath.row == viewModel.results.value.count - 1 {
-      viewModel.incrementPage()
+      viewModel.nextPage()
     }
   }
   
@@ -130,4 +93,5 @@ extension SearchRepositoriesVC: UISearchBarDelegate {
   func scrollViewDidScroll(_ scrollView: UIScrollView) {
     searchBar.resignFirstResponder()
   }
+  
 }

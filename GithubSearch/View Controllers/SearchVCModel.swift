@@ -15,6 +15,9 @@ protocol SearchVCModel: UIViewController,
   // MARK: - Properties
   var searchBar: UISearchBar { get }
   var tableView: UITableView { get }
+  
+  associatedtype Result: Codable
+  var viewModel: ResultsVM<Result> { get }
   var subscriptions: Set<AnyCancellable> { get set }
   
   // MARK: - Methods
@@ -26,7 +29,6 @@ protocol SearchVCModel: UIViewController,
   func setupLoadingIndicator()
   func showLoadingIndicator(_ shouldShow: Bool)
   func presentAlert(message: String)
-  
 }
 
 // MARK: - Default Implementation
@@ -76,4 +78,42 @@ extension SearchVCModel {
     present(alert, animated: true, completion: nil)
   }
   
+  func setupViewModel() {
+    viewModel.startReacting()
+    
+    viewModel.isLoading
+      .receive(on: DispatchQueue.main)
+      .sink { [weak self] shouldLoad in
+        self?.showLoadingIndicator(shouldLoad)
+      }
+      .store(in: &subscriptions)
+  }
+  
+  func reactToNewResults() {
+    viewModel.results
+      .receive(on: DispatchQueue.main)
+      .sink { [weak self] completion in
+        if case let .failure(error) = completion {
+          self?.presentAlert(message: error.description)
+        }
+      } receiveValue: { [weak self] results in
+        guard let self = self else { return }
+        guard !results.isEmpty else { return self.tableView.reloadData() }
+        
+        let count = results.count
+        if count % 30 == 0 {
+          let indexPaths = (count - 30 ... count - 1).reduce([]) { indexes, row in
+            return indexes + [IndexPath(row: row, section: 0)]
+          }
+          self.tableView.insertRows(at: indexPaths, with: .automatic)
+        } else {
+          let indexPaths = (count - (count % 30) ... count - 1).reduce([]) { indexes, row in
+            return indexes + [IndexPath(row: row, section: 0)]
+          }
+          self.tableView.insertRows(at: indexPaths, with: .automatic)
+        }
+      }
+      .store(in: &subscriptions)
+  }
+
 }

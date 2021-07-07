@@ -22,14 +22,6 @@ class ResultsVM<Result: Codable> {
   private let network = GithubAPI()
   
   // MARK: - Methods
-  func eraseResults() {
-    results.send([])
-  }
-  
-  func count() -> Int {
-    results.value.count
-  }
-  
   func getResults(for string: String, page: Int = 1) {
     network.getResults(resultType: Result.self, for: string, on: page)
       .sink { [weak self] completion in
@@ -55,7 +47,7 @@ class ResultsVM<Result: Codable> {
       .sink { [weak self] searchText in
         guard let self = self else { return }
         
-        self.eraseResults()
+        self.results.value = []
         if !searchText.isEmpty {
           self.page.send(1)
         }
@@ -66,7 +58,7 @@ class ResultsVM<Result: Codable> {
       .dropFirst()
       .sink { [weak self] page in
         guard let self = self else { return }
-        if page != 1, self.totalCount <= self.count() { return }
+        if page != 1, self.totalCount <= self.results.value.count { return }
         self.isLoading.send(true)
         self.getResults(for: self.search.value, page: page)
       }
@@ -74,8 +66,8 @@ class ResultsVM<Result: Codable> {
     
   }
   
-  func incrementPage() {
-    page.send(page.value + 1)
+  func nextPage() {
+    page.value += 1
   }
   
 }
