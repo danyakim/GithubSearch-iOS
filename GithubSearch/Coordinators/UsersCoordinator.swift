@@ -18,7 +18,7 @@ class UsersCoordinator: Coordinator {
   }
   
   func start() {
-    let vc = SearchUsersVC(viewModel: UsersVM())
+    let vc = SearchUsersVC()
     vc.coordinator = self
     
     navigationController.tabBarItem.title = "Users"

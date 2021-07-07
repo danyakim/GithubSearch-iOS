@@ -49,30 +49,37 @@ class DetailsVC: UITableViewController {
   }
   
   override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    let detailCell = DetailTableViewCell()
+    var data: DetailTableViewCellData
     switch indexPath.row {
     case 0:
-      return AboutTableViewCell(avatarLink: resultItem.owner.avatarURL,
-                                ownerName: resultItem.owner.login,
-                                repoName: resultItem.fullName,
-                                about: resultItem.itemDescription,
-                                link: resultItem.homepage,
-                                stars: resultItem.stargazersCount,
-                                forks: resultItem.forksCount)
+      let cell = AboutTableViewCell()
+      cell.configure(with: AboutTableViewCellData(avatarLink: resultItem.owner.avatarURL,
+                                                  ownerName: resultItem.owner.login,
+                                                  repoName: resultItem.fullName,
+                                                  about: resultItem.itemDescription,
+                                                  link: resultItem.homepage,
+                                                  stars: resultItem.stargazersCount,
+                                                  forks: resultItem.forksCount))
+      return cell
     case 1:
-      return DetailTableViewCell(image: UIImage(systemName: "smallcircle.fill.circle"),
-                                 cellName: "Issues",
-                                 details: String(resultItem.openIssuesCount))
+      data = DetailTableViewCellData(image: UIImage(systemName: "smallcircle.fill.circle"),
+                                         cellName: "Issues",
+                                         details: String(resultItem.openIssuesCount))
+      
     case 2:
-      return DetailTableViewCell(image: UIImage(systemName: "eye"),
-                                 cellName: "Watchers",
-                                 details: String(resultItem.watchersCount))
+      data = DetailTableViewCellData(image: UIImage(systemName: "eye"),
+                                         cellName: "Watchers",
+                                         details: String(resultItem.watchersCount))
     case 3:
-      return DetailTableViewCell(image: UIImage(systemName: "book"),
-                                 cellName: "Licence",
-                                 details: String(resultItem.license?.name ?? "No License"))
+      data = DetailTableViewCellData(image: UIImage(systemName: "book"),
+                                         cellName: "Licence",
+                                         details: String(resultItem.license?.name ?? "No License"))
     default:
       fatalError("unknown number of rows in static tableView")
     }
+    detailCell.configure(with: data)
+    return detailCell
   }
   
   override func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {

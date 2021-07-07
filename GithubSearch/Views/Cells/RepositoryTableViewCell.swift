@@ -1,5 +1,5 @@
 //
-//  ResultTableViewCell.swift
+//  RepositoryTableViewCell.swift
 //  GithubSearch
 //
 //  Created by Daniil Kim on 30.06.2021.
@@ -7,7 +7,16 @@
 
 import UIKit
 
-class ResultTableViewCell: UITableViewCell {
+// MARK: - Cell Data
+struct RepositoryTableViewCellData {
+  let name: String
+  let about: String?
+  let stars: Int?
+  let language: String?
+  let lastUpdated: String?
+}
+
+class RepositoryTableViewCell: UITableViewCell {
   
   // MARK: - UIViews
   private let nameLabel = UILabel()
@@ -17,21 +26,9 @@ class ResultTableViewCell: UITableViewCell {
   private let lastUpdatedLabel = UILabel()
   
   // MARK: - Initializers
-  required init(name: String?,
-                about: String?,
-                stars: Int?,
-                language: String?,
-                lastUpdated: String?) {
-    self.nameLabel.text = name
-    self.descriptionLabel.text = about
-    self.starsLabel.text = "☆ " + (stars ?? 0).formatUsingAbbreviation()
-    self.languageLabel.text = language
-    
-    super.init(style: .default, reuseIdentifier: nil)
-    
-    self.lastUpdatedLabel.text = "Updated " + getDateDescription(fromString: lastUpdated)
-    
-    setupCell()
+  override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    super.init(style: style, reuseIdentifier: reuseIdentifier)
+    setupViews()
   }
   
   required init?(coder: NSCoder) {
@@ -39,12 +36,29 @@ class ResultTableViewCell: UITableViewCell {
   }
   
   // MARK: - Lifecycle
-  override func awakeFromNib() {
-    super.awakeFromNib()
+  override func prepareForReuse() {
+    configure(with: nil)
+  }
+  
+  // MARK: - Public methods
+  public func configure(with data: RepositoryTableViewCellData?) {
+    guard let data = data else {
+      self.nameLabel.text = nil
+      self.descriptionLabel.text = nil
+      self.starsLabel.text = nil
+      self.languageLabel.text = nil
+      self.lastUpdatedLabel.text = nil
+      return
+    }
+    self.nameLabel.text = data.name
+    self.descriptionLabel.text = data.about
+    self.starsLabel.text = "☆ " + (data.stars ?? 0).formatUsingAbbreviation()
+    self.languageLabel.text = data.language
+    self.lastUpdatedLabel.text = "Updated " + getDateDescription(fromString: data.lastUpdated)
   }
   
   // MARK: - Private methods
-  private func setupCell() {
+  private func setupViews() {
     setupLabels()
     let hStack = UIStackView(arrangedSubviews: [starsLabel, languageLabel, lastUpdatedLabel])
     hStack.configure(axis: .horizontal, spacing: 15, alignment: .leading)

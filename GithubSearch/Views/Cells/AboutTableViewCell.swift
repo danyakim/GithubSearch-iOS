@@ -8,6 +8,17 @@
 import UIKit
 import Combine
 
+// MARK: - Cell Data
+struct AboutTableViewCellData {
+  let avatarLink: String
+  let ownerName: String
+  let repoName: String
+  let about: String?
+  let link: String?
+  let stars: Int
+  let forks: Int
+}
+
 class AboutTableViewCell: UITableViewCell {
   
   // MARK: - UIViews
@@ -25,31 +36,9 @@ class AboutTableViewCell: UITableViewCell {
   private var urlString: String?
   
   // MARK: - Initializers
-  required init(avatarLink: String,
-                ownerName: String,
-                repoName: String,
-                about: String?,
-                link: String?,
-                stars: Int,
-                forks: Int) {
-    self.ownerName.text = ownerName
-    self.repoName.text = repoName
-    self.about.text = about
-    self.stars.text = "⭐ " + stars.formatUsingAbbreviation()
-    self.forks.text = "⑂ " + forks.formatUsingAbbreviation()
+  override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    super.init(style: style, reuseIdentifier: reuseIdentifier)
     
-    super.init(style: .default, reuseIdentifier: nil)
-    
-    if let link = link,
-       !link.isEmpty {
-      self.urlString = link
-      self.link.text = "🔗 " + link
-      self.link.isUserInteractionEnabled = true
-      self.link.addGestureRecognizer(UITapGestureRecognizer(target: self,
-                                                            action: #selector(openLink)))
-    }
-    
-    loadAvatar(from: avatarLink)
     setupUI()
   }
   
@@ -57,16 +46,36 @@ class AboutTableViewCell: UITableViewCell {
     fatalError("init(coder:) has not been implemented")
   }
   
+  // MARK: - Lifecycle
+  override func prepareForReuse() {
+    configure(with: nil)
+  }
+  
+  // MARK: - Public methods
+  public func configure(with data: AboutTableViewCellData?) {
+    guard let data = data else {
+      ownerName.text = nil
+      repoName.text = nil
+      about.text = nil
+      stars.text = nil
+      forks.text = nil
+      link.text = nil
+      return
+    }
+    
+    ownerName.text = data.ownerName
+    repoName.text = data.repoName
+    about.text = data.about
+    stars.text = "⭐ " + data.stars.formatUsingAbbreviation()
+    forks.text = "⑂ " + data.forks.formatUsingAbbreviation()
+    configureLink(url: data.link)
+    loadAvatar(from: data.avatarLink)
+  }
+  
   // MARK: - Private methods
   private func setupUI() {
     setupLayout()
-    configureViews()
-  }
-  
-  @objc private func openLink() {
-    guard let urlString = urlString,
-          let url = URL(string: urlString) else { return }
-    UIApplication.shared.open(url, options: [:], completionHandler: nil)
+    setupViews()
   }
   
   private func setupLayout() {
@@ -94,7 +103,7 @@ class AboutTableViewCell: UITableViewCell {
                      padding: UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10))
   }
   
-  private func configureViews() {
+  private func setupViews() {
     avatar.anchor(size: CGSize(width: 20, height: 20))
     
     ownerName.font = .systemFont(ofSize: 16)
@@ -117,6 +126,23 @@ class AboutTableViewCell: UITableViewCell {
       .sink { [weak self] image in
         self?.avatar.image = image
       }
+  }
+  
+  private func configureLink(url: String?) {
+    if let url = url,
+       !url.isEmpty {
+      urlString = url
+      link.text = "🔗 " + url
+      link.isUserInteractionEnabled = true
+      link.addGestureRecognizer(UITapGestureRecognizer(target: self,
+                                                       action: #selector(openLink)))
+    }
+  }
+  
+  @objc private func openLink() {
+    guard let urlString = urlString,
+          let url = URL(string: urlString) else { return }
+    UIApplication.shared.open(url, options: [:], completionHandler: nil)
   }
   
 }

@@ -9,42 +9,39 @@ import Foundation
 import UIKit
 import Combine
 
-class SearchVCModel<VMType: ResultsVM>: UIViewController,
-                                            UIScrollViewDelegate,
-                                            UISearchBarDelegate {
-  
-  // MARK: - UIViews
-  private let searchBar = UISearchBar()
-  let tableView = UITableView()
+protocol SearchVCModel: UIViewController,
+                        UISearchBarDelegate {
   
   // MARK: - Properties
-  var viewModel: VMType
-  private var subscriptions = Set<AnyCancellable>()
+  var searchBar: UISearchBar { get }
+  var tableView: UITableView { get }
   
-  // MARK: - Initializers
-  init(viewModel: VMType) {
-    self.viewModel = viewModel
-    
-    super.init(nibName: nil, bundle: nil)
-  }
+  associatedtype Result: Codable
+  var viewModel: ResultsVM<Result> { get }
+  var subscriptions: Set<AnyCancellable> { get set }
   
-  required init?(coder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
+  // MARK: - Methods
+  func setupViewModel()
+  func setupViews()
+  func setupTableView()
+  func setupSearchBar()
+  func reactToNewResults()
+  func setupLoadingIndicator()
+  func showLoadingIndicator(_ shouldShow: Bool)
+  func presentAlert(message: String)
+}
+
+// MARK: - Default Implementation
+extension SearchVCModel {
   
-  // MARK: - View lifecycle
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    
+  func setupViews() {
     setupTableView()
     setupSearchBar()
     reactToNewResults()
     setupLoadingIndicator()
-    viewModel.startReacting()
   }
   
-  // MARK: - Private methods
-  private func setupTableView() {
+  func setupTableView() {
     view.addSubview(tableView)
     tableView.anchor(top: view.topAnchor,
                      leading: view.leadingAnchor,
@@ -53,12 +50,46 @@ class SearchVCModel<VMType: ResultsVM>: UIViewController,
     tableView.estimatedRowHeight = 88
   }
   
-  private func setupSearchBar() {
+  func setupSearchBar() {
     navigationItem.titleView = searchBar
     searchBar.delegate = self
   }
   
-  private func reactToNewResults() {
+  func setupLoadingIndicator() {
+    let spinner = UIActivityIndicatorView(style: .medium)
+    spinner.startAnimating()
+    spinner.frame = CGRect(x: CGFloat(0), y: CGFloat(0), width: tableView.bounds.width, height: 44)
+    tableView.tableFooterView = spinner
+    tableView.tableFooterView?.isHidden = true
+  }
+  
+  func showLoadingIndicator(_ shouldShow: Bool) {
+    if shouldShow {
+      tableView.tableFooterView?.isHidden = false
+    } else {
+      tableView.tableFooterView?.isHidden = true
+    }
+  }
+  
+  func presentAlert(message: String) {
+    let alert = UIAlertController(title: "Oops", message: message, preferredStyle: .alert)
+    let action = UIAlertAction(title: "Ok", style: .cancel, handler: nil)
+    alert.addAction(action)
+    present(alert, animated: true, completion: nil)
+  }
+  
+  func setupViewModel() {
+    viewModel.startReacting()
+    
+    viewModel.isLoading
+      .receive(on: DispatchQueue.main)
+      .sink { [weak self] shouldLoad in
+        self?.showLoadingIndicator(shouldLoad)
+      }
+      .store(in: &subscriptions)
+  }
+  
+  func reactToNewResults() {
     viewModel.results
       .receive(on: DispatchQueue.main)
       .sink { [weak self] completion in
@@ -84,50 +115,5 @@ class SearchVCModel<VMType: ResultsVM>: UIViewController,
       }
       .store(in: &subscriptions)
   }
-  
-  private func setupLoadingIndicator() {
-    let spinner = UIActivityIndicatorView(style: .medium)
-    spinner.startAnimating()
-    spinner.frame = CGRect(x: CGFloat(0), y: CGFloat(0), width: tableView.bounds.width, height: 44)
-    tableView.tableFooterView = spinner
-    tableView.tableFooterView?.isHidden = true
-    
-    viewModel.isLoading
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] shouldLoad in
-        self?.showLoadingIndicator(shouldLoad)
-      }
-      .store(in: &subscriptions)
-  }
-  
-  private func showLoadingIndicator(_ shouldShow: Bool) {
-    if shouldShow {
-      tableView.tableFooterView?.isHidden = false
-    } else {
-      tableView.tableFooterView?.isHidden = true
-    }
-  }
-  
-  private func presentAlert(message: String) {
-    let alert = UIAlertController(title: "Oops", message: message, preferredStyle: .alert)
-    let action = UIAlertAction(title: "Ok", style: .cancel, handler: nil)
-    alert.addAction(action)
-    present(alert, animated: true, completion: nil)
-  }
-  
-  // MARK: - SearchBarDelegate
-  func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-    searchBar.resignFirstResponder()
-  }
-  
-  func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-    viewModel.search.send(searchText)
-  }
-  
-  // MARK: - ScrollViewDelegate
-  
-  func scrollViewDidScroll(_ scrollView: UIScrollView) {
-    searchBar.resignFirstResponder()
-  }
-  
+
 }
