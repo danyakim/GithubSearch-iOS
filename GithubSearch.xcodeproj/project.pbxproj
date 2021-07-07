@@ -15,7 +15,7 @@
 		3B7D3B73268F6A2800920771 /* RepositoriesCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D3B72268F6A2800920771 /* RepositoriesCoordinator.swift */; };
 		3B7D3B75268F6A3400920771 /* UsersCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D3B74268F6A3400920771 /* UsersCoordinator.swift */; };
 		3B7D3B772692EDCA00920771 /* ResultsVM.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D3B762692EDCA00920771 /* ResultsVM.swift */; };
-		3B7D3B7A269303A100920771 /* SearchVCModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D3B79269303A100920771 /* SearchVCModel.swift */; };
+		3B7D3B7A269303A100920771 /* SearchVCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D3B79269303A100920771 /* SearchVCProtocol.swift */; };
 		3B7D3B7C269318AF00920771 /* UserTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D3B7B269318AF00920771 /* UserTableViewCell.swift */; };
 		3B7D3B7E2693562900920771 /* ReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D3B7D2693562900920771 /* ReusableView.swift */; };
 		3B7D3B81269356AC00920771 /* UITableViewCellExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7D3B80269356AC00920771 /* UITableViewCellExt.swift */; };
@@ -46,7 +46,7 @@
 		3B7D3B72268F6A2800920771 /* RepositoriesCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoriesCoordinator.swift; sourceTree = "<group>"; };
 		3B7D3B74268F6A3400920771 /* UsersCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsersCoordinator.swift; sourceTree = "<group>"; };
 		3B7D3B762692EDCA00920771 /* ResultsVM.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsVM.swift; sourceTree = "<group>"; };
-		3B7D3B79269303A100920771 /* SearchVCModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchVCModel.swift; sourceTree = "<group>"; };
+		3B7D3B79269303A100920771 /* SearchVCProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchVCProtocol.swift; sourceTree = "<group>"; };
 		3B7D3B7B269318AF00920771 /* UserTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserTableViewCell.swift; sourceTree = "<group>"; };
 		3B7D3B7D2693562900920771 /* ReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReusableView.swift; sourceTree = "<group>"; };
 		3B7D3B80269356AC00920771 /* UITableViewCellExt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITableViewCellExt.swift; sourceTree = "<group>"; };
@@ -175,7 +175,7 @@
 		3BF1FD27268C759900B4FB7E /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
-				3B7D3B79269303A100920771 /* SearchVCModel.swift */,
+				3B7D3B79269303A100920771 /* SearchVCProtocol.swift */,
 				3BF1FD2A268C765200B4FB7E /* SearchRepositoriesVC.swift */,
 				3B7D3B66268F4FD400920771 /* SearchUsersVC.swift */,
 				3BF1FD2C268C778400B4FB7E /* DetailsVC.swift */,
@@ -320,7 +320,7 @@
 				3B7D3B81269356AC00920771 /* UITableViewCellExt.swift in Sources */,
 				3BF1FD2D268C778400B4FB7E /* DetailsVC.swift in Sources */,
 				3B0D5F5B268C73A200D16A94 /* SceneDelegate.swift in Sources */,
-				3B7D3B7A269303A100920771 /* SearchVCModel.swift in Sources */,
+				3B7D3B7A269303A100920771 /* SearchVCProtocol.swift in Sources */,
 				3BF1FD40268DFA0400B4FB7E /* Coordinator.swift in Sources */,
 				3BF1FD4C268E2B6E00B4FB7E /* DetailTableViewCell.swift in Sources */,
 				3BF1FD2B268C765200B4FB7E /* SearchRepositoriesVC.swift in Sources */,

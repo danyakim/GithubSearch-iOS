@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 import Combine
 
-protocol SearchVCModel: UIViewController,
+protocol SearchVCProtocol: UIViewController,
                         UISearchBarDelegate {
   
   // MARK: - Properties
@@ -32,7 +32,7 @@ protocol SearchVCModel: UIViewController,
 }
 
 // MARK: - Default Implementation
-extension SearchVCModel {
+extension SearchVCProtocol {
   
   func setupViews() {
     setupTableView()

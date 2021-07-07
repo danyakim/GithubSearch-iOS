@@ -9,7 +9,7 @@ import UIKit
 import Combine
 
 class SearchRepositoriesVC: UIViewController,
-                            SearchVCModel {
+                            SearchVCProtocol {
   
   // MARK: - Properties
   var searchBar = UISearchBar()
