@@ -15,7 +15,10 @@ class SearchUsersVC: UIViewController,
   var searchBar = UISearchBar()
   var tableView = UITableView()
   
-  var tableViewManager: TableViewManager<User, UserTableViewCell>?
+  var tableViewManager = TableViewManager<User, UserTableViewCell> { cell, _, user in
+    cell.configure(with: UserTableViewCellData(name: user.login,
+                                               avatarURL: user.avatarURL))
+  }
   var viewModel = ResultsVM<User>()
   var subscriptions = Set<AnyCancellable>()
   
@@ -32,10 +35,6 @@ class SearchUsersVC: UIViewController,
   }
   
   func setupTableViewManager() {
-    let tableViewManager = TableViewManager<User, UserTableViewCell> { cell, _, user in
-      cell.configure(with: UserTableViewCellData(name: user.login,
-                                                 avatarURL: user.avatarURL))
-    }
     tableViewManager.tableView = tableView
     
     let callbacks = TableViewManager<User, UserTableViewCell>.Callbacks(onSelectCell: nil) { [weak self] in
@@ -47,8 +46,6 @@ class SearchUsersVC: UIViewController,
       self?.coordinator?.presentAlert(message: error.description)
     }
     tableViewManager.callbacks = callbacks
-    
-    self.tableViewManager = tableViewManager
   }
   
 }

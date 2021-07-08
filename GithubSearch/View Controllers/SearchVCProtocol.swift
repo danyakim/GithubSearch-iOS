@@ -18,7 +18,7 @@ protocol SearchVCProtocol: UIViewController,
   
   associatedtype Result: Codable
   associatedtype CellClass: UITableViewCell
-  var tableViewManager: TableViewManager<Result, CellClass>? { get set }
+  var tableViewManager: TableViewManager<Result, CellClass> { get set }
   var viewModel: ResultsVM<Result> { get }
   var subscriptions: Set<AnyCancellable> { get set }
   
@@ -61,7 +61,7 @@ extension SearchVCProtocol {
   }
   
   func setupViewModel() {
-    guard let tableViewManager = tableViewManager else { fatalError("Should setup tableViewManager first") }
+    viewModel.results = tableViewManager.elements
     viewModel.startReacting()
     
     viewModel.isLoading
@@ -70,8 +70,6 @@ extension SearchVCProtocol {
         self?.tableView.showLoadingIndicator(shouldLoad)
       }
       .store(in: &subscriptions)
-    
-    viewModel.results = tableViewManager.elements
   }
   
 }
