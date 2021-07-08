@@ -15,7 +15,7 @@ class SearchRepositoriesVC: UIViewController,
   var searchBar = UISearchBar()
   var tableView = UITableView()
   
-  var tableViewManager = TableViewManager<Repository, RepositoryTableViewCell> { cell, _, repository in
+  lazy var tableViewManager = TableViewManager<Repository, RepositoryTableViewCell>(publisher: viewModel.results) { cell, _, repository in
     cell.configure(with: RepositoryTableViewCellData(name: repository.fullName,
                                                      about: repository.itemDescription,
                                                      stars: repository.stargazersCount,

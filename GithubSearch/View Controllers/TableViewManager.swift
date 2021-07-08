@@ -32,11 +32,12 @@ class TableViewManager<Item: Codable, CellClass: UITableViewCell>: NSObject,
   let configureCell: (CellClass, IndexPath, Item) -> Void
   var callbacks = Callbacks()
   
-  var elements = CurrentValueSubject<[Item], Error>([])
+  var elements: CurrentValueSubject<[Item], Error>
   private var subscriptions = Set<AnyCancellable>()
   
   // MARK: - Initializers
-  init(configureCell: @escaping (CellClass, IndexPath, Item) -> Void) {
+  init(publisher: CurrentValueSubject<[Item], Error>, configureCell: @escaping (CellClass, IndexPath, Item) -> Void) {
+    self.elements = publisher
     self.configureCell = configureCell
     super.init()
     reactToNewResults()

@@ -17,8 +17,6 @@ protocol SearchVCProtocol: UIViewController,
   var tableView: UITableView { get }
   
   associatedtype Result: Codable
-  associatedtype CellClass: UITableViewCell
-  var tableViewManager: TableViewManager<Result, CellClass> { get set }
   var viewModel: ResultsVM<Result> { get }
   var subscriptions: Set<AnyCancellable> { get set }
   
@@ -61,7 +59,6 @@ extension SearchVCProtocol {
   }
   
   func setupViewModel() {
-    viewModel.results = tableViewManager.elements
     viewModel.startReacting()
     
     viewModel.isLoading

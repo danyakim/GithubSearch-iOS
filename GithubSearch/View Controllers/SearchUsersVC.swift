@@ -15,7 +15,7 @@ class SearchUsersVC: UIViewController,
   var searchBar = UISearchBar()
   var tableView = UITableView()
   
-  var tableViewManager = TableViewManager<User, UserTableViewCell> { cell, _, user in
+  lazy var tableViewManager = TableViewManager<User, UserTableViewCell>(publisher: viewModel.results) { cell, _, user in
     cell.configure(with: UserTableViewCellData(name: user.login,
                                                avatarURL: user.avatarURL))
   }
