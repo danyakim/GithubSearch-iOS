@@ -9,12 +9,13 @@ import UIKit
 import Combine
 
 class SearchUsersVC: UIViewController,
-                     SearchVCProtocol {
+                     SearchVCProtocol {  
   
   // MARK: - Properties
   var searchBar = UISearchBar()
   var tableView = UITableView()
   
+  var tableViewManager: TableViewManager<User, UserTableViewCell>?
   var viewModel = ResultsVM<User>()
   var subscriptions = Set<AnyCancellable>()
   
@@ -25,50 +26,29 @@ class SearchUsersVC: UIViewController,
     super.viewDidLoad()
     
     setupViews()
-    setupViewModel()
-    
-    tableView.delegate = self
-    tableView.dataSource = self
+    bindVMAndManager()
     
     tableView.register(cellClass: UserTableViewCell.self)
   }
   
-}
-
-// MARK: - TableViewDataSource
-extension SearchUsersVC: UITableViewDataSource {
-  
-  func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    return viewModel.results.value.count
-  }
-  
-}
-
-// MARK: - TableViewDelegate
-extension SearchUsersVC: UITableViewDelegate {
-  
-  func tableView(_ tableView: UITableView,
-                 heightForRowAt indexPath: IndexPath) -> CGFloat {
-    return UITableView.automaticDimension
-  }
-  
-  func tableView(_ tableView: UITableView,
-                 cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let user = viewModel.results.value[indexPath.row]
-    let cell = tableView.dequeue(cellClass: UserTableViewCell.self, for: indexPath)
-    cell.configure(with: UserTableViewCellData(name: user.login,
-                                               avatarURL: user.avatarURL))
-    return cell
-  }
-  
-  func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-    if indexPath.row == viewModel.results.value.count - 1 {
-      viewModel.nextPage()
+  func setupTableViewManager() {
+    let tableViewManager = TableViewManager<User, UserTableViewCell> { cell, _, user in
+      cell.configure(with: UserTableViewCellData(name: user.login,
+                                                 avatarURL: user.avatarURL))
     }
-  }
-  
-  func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
-    return nil
+    tableViewManager.tableView = tableView
+    
+    let callbacks = TableViewManager<User, UserTableViewCell>.Callbacks(onSelectCell: nil) { [weak self] in
+      self?.searchBar.resignFirstResponder()
+    } onScrollToEnd: { [weak self] in
+      self?.viewModel.nextPage()
+    } onReceiveError: { [weak self] error in
+      guard let error = error as? GithubError else { return }
+      self?.coordinator?.presentAlert(message: error.description)
+    }
+    tableViewManager.callbacks = callbacks
+    
+    self.tableViewManager = tableViewManager
   }
   
 }
@@ -83,8 +63,4 @@ extension SearchUsersVC: UISearchBarDelegate {
     viewModel.search.send(searchText)
   }
   
-  // MARK: - ScrollViewDelegate
-  func scrollViewDidScroll(_ scrollView: UIScrollView) {
-    searchBar.resignFirstResponder()
-  }
 }

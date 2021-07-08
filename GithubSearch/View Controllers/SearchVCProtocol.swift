@@ -10,25 +10,26 @@ import UIKit
 import Combine
 
 protocol SearchVCProtocol: UIViewController,
-                        UISearchBarDelegate {
+                           UISearchBarDelegate {
   
   // MARK: - Properties
   var searchBar: UISearchBar { get }
   var tableView: UITableView { get }
   
   associatedtype Result: Codable
+  associatedtype CellClass: UITableViewCell
+  var tableViewManager: TableViewManager<Result, CellClass>? { get set }
   var viewModel: ResultsVM<Result> { get }
   var subscriptions: Set<AnyCancellable> { get set }
   
   // MARK: - Methods
-  func setupViewModel()
   func setupViews()
   func setupTableView()
   func setupSearchBar()
-  func reactToNewResults()
-  func setupLoadingIndicator()
-  func showLoadingIndicator(_ shouldShow: Bool)
-  func presentAlert(message: String)
+  
+  func bindVMAndManager()
+  func setupViewModel()
+  func setupTableViewManager()
 }
 
 // MARK: - Default Implementation
@@ -37,8 +38,7 @@ extension SearchVCProtocol {
   func setupViews() {
     setupTableView()
     setupSearchBar()
-    reactToNewResults()
-    setupLoadingIndicator()
+    tableView.setupLoadingIndicator()
   }
   
   func setupTableView() {
@@ -55,65 +55,23 @@ extension SearchVCProtocol {
     searchBar.delegate = self
   }
   
-  func setupLoadingIndicator() {
-    let spinner = UIActivityIndicatorView(style: .medium)
-    spinner.startAnimating()
-    spinner.frame = CGRect(x: CGFloat(0), y: CGFloat(0), width: tableView.bounds.width, height: 44)
-    tableView.tableFooterView = spinner
-    tableView.tableFooterView?.isHidden = true
-  }
-  
-  func showLoadingIndicator(_ shouldShow: Bool) {
-    if shouldShow {
-      tableView.tableFooterView?.isHidden = false
-    } else {
-      tableView.tableFooterView?.isHidden = true
-    }
-  }
-  
-  func presentAlert(message: String) {
-    let alert = UIAlertController(title: "Oops", message: message, preferredStyle: .alert)
-    let action = UIAlertAction(title: "Ok", style: .cancel, handler: nil)
-    alert.addAction(action)
-    present(alert, animated: true, completion: nil)
+  func bindVMAndManager() {
+    setupTableViewManager()
+    setupViewModel()
   }
   
   func setupViewModel() {
+    guard let tableViewManager = tableViewManager else { fatalError("Should setup tableViewManager first") }
     viewModel.startReacting()
     
     viewModel.isLoading
       .receive(on: DispatchQueue.main)
       .sink { [weak self] shouldLoad in
-        self?.showLoadingIndicator(shouldLoad)
+        self?.tableView.showLoadingIndicator(shouldLoad)
       }
       .store(in: &subscriptions)
+    
+    viewModel.results = tableViewManager.elements
   }
   
-  func reactToNewResults() {
-    viewModel.results
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] completion in
-        if case let .failure(error) = completion {
-          self?.presentAlert(message: error.description)
-        }
-      } receiveValue: { [weak self] results in
-        guard let self = self else { return }
-        guard !results.isEmpty else { return self.tableView.reloadData() }
-        
-        let count = results.count
-        if count % 30 == 0 {
-          let indexPaths = (count - 30 ... count - 1).reduce([]) { indexes, row in
-            return indexes + [IndexPath(row: row, section: 0)]
-          }
-          self.tableView.insertRows(at: indexPaths, with: .automatic)
-        } else {
-          let indexPaths = (count - (count % 30) ... count - 1).reduce([]) { indexes, row in
-            return indexes + [IndexPath(row: row, section: 0)]
-          }
-          self.tableView.insertRows(at: indexPaths, with: .automatic)
-        }
-      }
-      .store(in: &subscriptions)
-  }
-
 }

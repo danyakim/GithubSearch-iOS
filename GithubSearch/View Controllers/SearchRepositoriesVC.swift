@@ -15,6 +15,7 @@ class SearchRepositoriesVC: UIViewController,
   var searchBar = UISearchBar()
   var tableView = UITableView()
   
+  var tableViewManager: TableViewManager<Repository, RepositoryTableViewCell>?
   var viewModel = ResultsVM<Repository>()
   var subscriptions = Set<AnyCancellable>()
   
@@ -25,56 +26,34 @@ class SearchRepositoriesVC: UIViewController,
     super.viewDidLoad()
     
     setupViews()
-    setupViewModel()
-    
-    tableView.delegate = self
-    tableView.dataSource = self
+    bindVMAndManager()
     
     tableView.register(cellClass: RepositoryTableViewCell.self)
   }
-}
-
-// MARK: - TableViewDataSource
-extension SearchRepositoriesVC: UITableViewDataSource {
   
-  func tableView(_ tableView: UITableView,
-                 numberOfRowsInSection section: Int) -> Int {
-    return viewModel.results.value.count
-  }
-  
-}
-
-// MARK: - TableViewDelegate
-extension SearchRepositoriesVC: UITableViewDelegate {
-  
-  func tableView(_ tableView: UITableView,
-                 heightForRowAt indexPath: IndexPath) -> CGFloat {
-    return UITableView.automaticDimension
-  }
-  
-  func tableView(_ tableView: UITableView,
-                 cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let repository = viewModel.results.value[indexPath.row]
-    let cell = tableView.dequeue(cellClass: RepositoryTableViewCell.self, for: indexPath)
-    cell.configure(with: RepositoryTableViewCellData(name: repository.fullName,
-                                                     about: repository.itemDescription,
-                                                     stars: repository.stargazersCount,
-                                                     language: repository.language,
-                                                     lastUpdated: repository.updatedAt))
-    return cell
-  }
-  
-  func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    tableView.deselectRow(at: indexPath, animated: true)
-    
-    let result = viewModel.results.value[indexPath.row]
-    coordinator?.showDetails(for: result)
-  }
-  
-  func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-    if indexPath.row == viewModel.results.value.count - 1 {
-      viewModel.nextPage()
+  func setupTableViewManager() {
+    let tableViewManager = TableViewManager<Repository, RepositoryTableViewCell> { cell, _, repository in
+      cell.configure(with: RepositoryTableViewCellData(name: repository.fullName,
+                                                       about: repository.itemDescription,
+                                                       stars: repository.stargazersCount,
+                                                       language: repository.language,
+                                                       lastUpdated: repository.updatedAt))
     }
+    tableViewManager.tableView = tableView
+    
+    let callbacks = TableViewManager<Repository, RepositoryTableViewCell>.Callbacks { [weak self] repository in
+      self?.coordinator?.showDetails(for: repository)
+    } onScroll: { [weak self] in
+      self?.searchBar.resignFirstResponder()
+    } onScrollToEnd: { [weak self] in
+      self?.viewModel.nextPage()
+    } onReceiveError: { [weak self] error in
+      guard let error = error as? GithubError else { return }
+      self?.coordinator?.presentAlert(message: error.description)
+    }
+    tableViewManager.callbacks = callbacks
+    
+    self.tableViewManager = tableViewManager
   }
   
 }
@@ -87,11 +66,6 @@ extension SearchRepositoriesVC: UISearchBarDelegate {
   
   func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
     viewModel.search.send(searchText)
-  }
-  
-  // MARK: - ScrollViewDelegate
-  func scrollViewDidScroll(_ scrollView: UIScrollView) {
-    searchBar.resignFirstResponder()
   }
   
 }
