@@ -15,7 +15,13 @@ class SearchRepositoriesVC: UIViewController,
   var searchBar = UISearchBar()
   var tableView = UITableView()
   
-  var tableViewManager: TableViewManager<Repository, RepositoryTableViewCell>?
+  var tableViewManager = TableViewManager<Repository, RepositoryTableViewCell> { cell, _, repository in
+    cell.configure(with: RepositoryTableViewCellData(name: repository.fullName,
+                                                     about: repository.itemDescription,
+                                                     stars: repository.stargazersCount,
+                                                     language: repository.language,
+                                                     lastUpdated: repository.updatedAt))
+  }
   var viewModel = ResultsVM<Repository>()
   var subscriptions = Set<AnyCancellable>()
   
@@ -32,13 +38,6 @@ class SearchRepositoriesVC: UIViewController,
   }
   
   func setupTableViewManager() {
-    let tableViewManager = TableViewManager<Repository, RepositoryTableViewCell> { cell, _, repository in
-      cell.configure(with: RepositoryTableViewCellData(name: repository.fullName,
-                                                       about: repository.itemDescription,
-                                                       stars: repository.stargazersCount,
-                                                       language: repository.language,
-                                                       lastUpdated: repository.updatedAt))
-    }
     tableViewManager.tableView = tableView
     
     let callbacks = TableViewManager<Repository, RepositoryTableViewCell>.Callbacks { [weak self] repository in
@@ -52,8 +51,6 @@ class SearchRepositoriesVC: UIViewController,
       self?.coordinator?.presentAlert(message: error.description)
     }
     tableViewManager.callbacks = callbacks
-    
-    self.tableViewManager = tableViewManager
   }
   
 }
