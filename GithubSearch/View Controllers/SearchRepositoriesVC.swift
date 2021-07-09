@@ -24,7 +24,7 @@ class SearchRepositoriesVC: UIViewController,
   }
   var viewModel = ResultsVM<Repository>()
   var subscriptions = Set<AnyCancellable>()
-  
+      
   weak var coordinator: RepositoriesCoordinator?
   
   // MARK: - Methods
@@ -32,7 +32,8 @@ class SearchRepositoriesVC: UIViewController,
     super.viewDidLoad()
     
     setupViews()
-    bindVMAndManager()
+    setupViewModel()
+    setupTableViewManager()
     
     tableView.register(cellClass: RepositoryTableViewCell.self)
   }

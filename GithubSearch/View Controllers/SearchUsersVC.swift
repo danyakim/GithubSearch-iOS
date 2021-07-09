@@ -29,7 +29,8 @@ class SearchUsersVC: UIViewController,
     super.viewDidLoad()
     
     setupViews()
-    bindVMAndManager()
+    setupViewModel()
+    setupTableViewManager()
     
     tableView.register(cellClass: UserTableViewCell.self)
   }

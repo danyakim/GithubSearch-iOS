@@ -25,7 +25,6 @@ protocol SearchVCProtocol: UIViewController,
   func setupTableView()
   func setupSearchBar()
   
-  func bindVMAndManager()
   func setupViewModel()
   func setupTableViewManager()
 }
@@ -51,11 +50,6 @@ extension SearchVCProtocol {
   func setupSearchBar() {
     navigationItem.titleView = searchBar
     searchBar.delegate = self
-  }
-  
-  func bindVMAndManager() {
-    setupTableViewManager()
-    setupViewModel()
   }
   
   func setupViewModel() {
