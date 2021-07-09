@@ -11,7 +11,7 @@ import Combine
 class ResultsVM<Result: Codable> {
   
   // MARK: - Properties
-  private(set) var results = CurrentValueSubject<[Result], GithubError>([])
+  private(set) var results = CurrentValueSubject<[Result], Error>([])
   private(set) var search = CurrentValueSubject<String, Never>("")
   private(set) var isLoading = PassthroughSubject<Bool, Never>()
   
@@ -58,7 +58,8 @@ class ResultsVM<Result: Codable> {
       .dropFirst()
       .sink { [weak self] page in
         guard let self = self else { return }
-        if page != 1, self.totalCount <= self.results.value.count { return }
+        if page != 1,
+           self.totalCount <= self.results.value.count { return }
         self.isLoading.send(true)
         self.getResults(for: self.search.value, page: page)
       }

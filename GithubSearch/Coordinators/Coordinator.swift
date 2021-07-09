@@ -13,4 +13,17 @@ protocol Coordinator {
   var navigationController: UINavigationController { get set }
   
   func start()
+  
+  func presentAlert(message: String, title: String, actionTitle: String)
+}
+
+extension Coordinator {
+  
+  func presentAlert(message: String, title: String = "Oops", actionTitle: String = "Ok") {
+    let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+    let action = UIAlertAction(title: actionTitle, style: .cancel, handler: nil)
+    alert.addAction(action)
+    navigationController.present(alert, animated: true, completion: nil)
+  }
+  
 }

@@ -23,4 +23,25 @@ extension UITableView {
     return cell
   }
   
+  func setupLoadingIndicator() {
+    let spinner = UIActivityIndicatorView(style: .medium)
+    spinner.startAnimating()
+    spinner.frame = CGRect(x: CGFloat(0), y: CGFloat(0), width: bounds.width, height: 44)
+    tableFooterView = spinner
+    tableFooterView?.isHidden = true
+  }
+  
+  func showLoadingIndicator(_ shouldShow: Bool) {
+    guard let footer = tableFooterView,
+            footer.self is UIActivityIndicatorView else {
+      print("tableFooterView is not a Spinner")
+      return
+    }
+    if shouldShow {
+      footer.isHidden = false
+    } else {
+      footer.isHidden = true
+    }
+  }
+  
 }
