@@ -50,7 +50,7 @@ class SearchUsersVC: UIViewController {
                      leading: view.leadingAnchor,
                      bottom: view.bottomAnchor,
                      trailing: view.trailingAnchor)
-    tableView.estimatedRowHeight = 88
+    tableView.estimatedRowHeight = 66
   }
   
   func setupSearchBar() {
@@ -83,6 +83,8 @@ class SearchUsersVC: UIViewController {
       guard let error = error as? GithubError else { return }
       self?.coordinator?.presentAlert(message: error.description)
     }
+    
+    tableViewManager.cellHeight = 66
   }
   
 }

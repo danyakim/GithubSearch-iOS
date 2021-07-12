@@ -29,6 +29,7 @@ class TableViewManager<Item: Codable, CellClass: UITableViewCell>: NSObject,
       tableView.dataSource = self
     }
   }
+  var cellHeight: CGFloat?
   let configureCell: (CellClass, IndexPath, Item) -> Void
   var callbacks = Callbacks()
   
@@ -82,6 +83,7 @@ class TableViewManager<Item: Codable, CellClass: UITableViewCell>: NSObject,
   // MARK: - TableViewDelegate
   func tableView(_ tableView: UITableView,
                  heightForRowAt indexPath: IndexPath) -> CGFloat {
+    if let cellHeight = cellHeight { return cellHeight }
     return UITableView.automaticDimension
   }
   

@@ -52,19 +52,20 @@ class UserTableViewCell: UITableViewCell {
   
   // MARK: - Private methods
   private func setupViews() {
-    imageView?.anchor(top: contentView.topAnchor,
+    guard let imageView = imageView else { return }
+    imageView.anchor(top: contentView.topAnchor,
                       leading: contentView.leadingAnchor,
                       bottom: contentView.bottomAnchor,
                       padding: UIEdgeInsets(top: 4, left: 4, bottom: 4, right: 0),
                       size: CGSize(width: 58, height: 58))
-    imageView?.layer.cornerRadius = 5
-    imageView?.layer.masksToBounds = true
+    imageView.layer.cornerRadius = 5
+    imageView.layer.masksToBounds = true
     
-    textLabel?.anchor(leading: imageView?.trailingAnchor,
+    textLabel?.anchor(leading: imageView.trailingAnchor,
                       centerY: contentView.centerYAnchor,
                       padding: UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0))
     
-    imageView?.image = defaultImage
+    imageView.image = defaultImage
   }
   
   private func loadImage(from link: String) {
