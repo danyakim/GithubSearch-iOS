@@ -83,39 +83,4 @@ class GithubAPI {
     }
   }
   
-//  public func getUsers(for string: String, on page: Int)
-//  -> Future<SearchResult<User>, GithubError> {
-//    let urlString = baseURL + "/search/users?q=\(string)&page=\(String(page))"
-//
-//    return makeRequest(for: urlString)
-//  }
-  
-  // MARK: - Private Methods
-//  private func makeRequest<T: Codable>(for urlString: String) -> Future<SearchResult<T>, GithubError> {
-//    return Future { promise in
-//      guard let url = URL(string: urlString) else {
-//        return promise(.failure(GithubError.badURL))
-//      }
-//      URLSession.shared
-//        .dataTaskPublisher(for: url)
-//        .map(\.data)
-//        .decode(type: SearchResult.self, decoder: JSONDecoder())
-//        .sink { completion in
-//          if case let .failure(error) = completion {
-//            switch error {
-//            case is URLError:
-//              promise(.failure(GithubError.network))
-//            case is DecodingError:
-//              promise(.failure(GithubError.parsing))
-//            default:
-//              promise(.failure(GithubError.unknown))
-//            }
-//          }
-//        } receiveValue: { result in
-//          promise(.success(result))
-//        }
-//        .store(in: &self.subscriptions)
-//    }
-//  }
-  
 }

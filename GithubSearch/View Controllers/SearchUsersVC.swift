@@ -32,7 +32,7 @@ class SearchUsersVC: UIViewController {
     super.viewDidLoad()
     
     setupViews()
-    setupViewModel()
+    reactToLoading()
     setupTableViewManager()
     
     tableView.register(cellClass: UserTableViewCell.self)
@@ -58,9 +58,7 @@ class SearchUsersVC: UIViewController {
     searchBar.delegate = self
   }
   
-  func setupViewModel() {
-    viewModel.setupSearch()
-    
+  func reactToLoading() {
     viewModel.isLoading
       .receive(on: DispatchQueue.main)
       .sink { [weak self] shouldLoad in
@@ -79,7 +77,6 @@ class SearchUsersVC: UIViewController {
       self?.viewModel.nextPage()
     }
     tableViewManager.callbacks.onReceiveError = { [weak self] error in
-      self?.viewModel.isLoading.send(false)
       guard let error = error as? GithubError else { return }
       self?.coordinator?.presentAlert(message: error.description)
     }
@@ -89,8 +86,9 @@ class SearchUsersVC: UIViewController {
   
 }
 
+// MARK: - SearchBarDelegate
 extension SearchUsersVC: UISearchBarDelegate {
-  // MARK: - SearchBarDelegate
+  
   func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
     searchBar.resignFirstResponder()
   }

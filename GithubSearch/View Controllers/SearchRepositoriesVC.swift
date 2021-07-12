@@ -35,7 +35,7 @@ class SearchRepositoriesVC: UIViewController {
     super.viewDidLoad()
     
     setupViews()
-    setupViewModel()
+    reactToLoading()
     setupTableViewManager()
     
     tableView.register(cellClass: RepositoryTableViewCell.self)
@@ -61,9 +61,7 @@ class SearchRepositoriesVC: UIViewController {
     searchBar.delegate = self
   }
   
-  func setupViewModel() {
-    viewModel.setupSearch()
-    
+  func reactToLoading() {
     viewModel.isLoading
       .receive(on: DispatchQueue.main)
       .sink { [weak self] shouldLoad in
@@ -85,7 +83,6 @@ class SearchRepositoriesVC: UIViewController {
       self?.viewModel.nextPage()
     }
     tableViewManager.callbacks.onReceiveError = { [weak self] error in
-      self?.viewModel.isLoading.send(false)
       guard let error = error as? GithubError else { return }
       self?.coordinator?.presentAlert(message: error.description)
     }
@@ -93,8 +90,9 @@ class SearchRepositoriesVC: UIViewController {
   
 }
 
+// MARK: - SearchBarDelegate
 extension SearchRepositoriesVC: UISearchBarDelegate {
-  // MARK: - SearchBarDelegate
+  
   func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
     searchBar.resignFirstResponder()
   }

@@ -24,6 +24,8 @@ class ResultsVM<Result: Codable> {
   // MARK: - Initializers
   init(searchPublisher: AnyPublisher<String, Never>) {
     self.search = searchPublisher
+    
+    setupSearch()
   }
   
   // MARK: - Methods
@@ -32,6 +34,7 @@ class ResultsVM<Result: Codable> {
     network.getResults(resultType: Result.self, for: string, on: page)
       .sink { [weak self] completion in
         if case let .failure(error) = completion {
+          self?.isLoading.send(false)
           self?.results.send(completion: .failure(error))
         }
       } receiveValue: { [weak self] receivedResult in
@@ -45,7 +48,13 @@ class ResultsVM<Result: Codable> {
       .store(in: &subscriptions)
   }
   
-  func setupSearch() {
+  func nextPage() {
+    guard self.totalCount > self.results.value.count else { return }
+    page.value += 1
+  }
+  
+  // MARK: - Private Methods
+  private func setupSearch() {
     search
       .handleEvents(receiveOutput: { [weak self] _ in
         self?.results.value = []
@@ -64,11 +73,6 @@ class ResultsVM<Result: Codable> {
         self.getResults(for: search, page: page)
       })
       .store(in: &subscriptions)
-  }
-  
-  func nextPage() {
-    guard self.totalCount > self.results.value.count else { return }
-    page.value += 1
   }
   
 }
