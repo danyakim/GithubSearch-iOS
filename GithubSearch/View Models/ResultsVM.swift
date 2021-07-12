@@ -12,14 +12,19 @@ class ResultsVM<Result: Codable> {
   
   // MARK: - Properties
   private(set) var results = CurrentValueSubject<[Result], Error>([])
-  private(set) var search = CurrentValueSubject<String, Never>("")
   private(set) var isLoading = PassthroughSubject<Bool, Never>()
   
-  private var totalCount = 0
+  private var search: AnyPublisher<String, Never>
   private var page = CurrentValueSubject<Int, Never>(1)
+  private var totalCount = 0
   private var subscriptions = Set<AnyCancellable>()
   
   private let network = GithubAPI()
+  
+  // MARK: - Initializers
+  init(searchPublisher: AnyPublisher<String, Never>) {
+    self.search = searchPublisher
+  }
   
   // MARK: - Methods
   func getResults(for string: String, page: Int = 1) {
@@ -40,20 +45,6 @@ class ResultsVM<Result: Codable> {
   }
 
   func startReacting() {
-    search
-      .dropFirst()
-      .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
-      .removeDuplicates()
-      .sink { [weak self] searchText in
-        guard let self = self else { return }
-        
-        self.results.value = []
-        if !searchText.isEmpty {
-          self.page.send(1)
-        }
-      }
-      .store(in: &subscriptions)
-    
     page
       .dropFirst()
       .sink { [weak self] page in
@@ -61,10 +52,19 @@ class ResultsVM<Result: Codable> {
         if page != 1,
            self.totalCount <= self.results.value.count { return }
         self.isLoading.send(true)
-        self.getResults(for: self.search.value, page: page)
       }
       .store(in: &subscriptions)
     
+    search
+      .handleEvents(receiveOutput: { [weak self] _ in
+        self?.results.value = []
+      })
+      .filter({ !$0.isEmpty })
+      .combineLatest(page)
+      .sink(receiveValue: { search, page in
+        self.getResults(for: search, page: page)
+      })
+      .store(in: &subscriptions)
   }
   
   func nextPage() {

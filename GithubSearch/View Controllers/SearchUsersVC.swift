@@ -8,19 +8,22 @@
 import UIKit
 import Combine
 
-class SearchUsersVC: UIViewController,
-                     SearchVCProtocol {  
+class SearchUsersVC: UIViewController {
   
   // MARK: - Properties
-  var searchBar = UISearchBar()
-  var tableView = UITableView()
+  private var searchBar = UISearchBar()
+  private var tableView = UITableView()
+  private var subscriptions = Set<AnyCancellable>()
+  private var search = PassthroughSubject<String, Never>()
   
-  lazy var tableViewManager = TableViewManager<User, UserTableViewCell>(publisher: viewModel.results) { cell, _, user in
+  private lazy var viewModel = ResultsVM<User>(searchPublisher: search
+                                                .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
+                                                .removeDuplicates()
+                                                .eraseToAnyPublisher())
+  private lazy var tableViewManager = TableViewManager<User, UserTableViewCell>(publisher: viewModel.results) { cell, _, user in
     cell.configure(with: UserTableViewCellData(name: user.login,
                                                avatarURL: user.avatarURL))
   }
-  var viewModel = ResultsVM<User>()
-  var subscriptions = Set<AnyCancellable>()
   
   weak var coordinator: UsersCoordinator?
   
@@ -35,18 +38,51 @@ class SearchUsersVC: UIViewController,
     tableView.register(cellClass: UserTableViewCell.self)
   }
   
+  func setupViews() {
+    setupTableView()
+    setupSearchBar()
+    tableView.setupLoadingIndicator()
+  }
+  
+  func setupTableView() {
+    view.addSubview(tableView)
+    tableView.anchor(top: view.topAnchor,
+                     leading: view.leadingAnchor,
+                     bottom: view.bottomAnchor,
+                     trailing: view.trailingAnchor)
+    tableView.estimatedRowHeight = 88
+  }
+  
+  func setupSearchBar() {
+    navigationItem.titleView = searchBar
+    searchBar.delegate = self
+  }
+  
+  func setupViewModel() {
+    viewModel.startReacting()
+    
+    viewModel.isLoading
+      .receive(on: DispatchQueue.main)
+      .sink { [weak self] shouldLoad in
+        self?.tableView.showLoadingIndicator(shouldLoad)
+      }
+      .store(in: &subscriptions)
+  }
+  
   func setupTableViewManager() {
     tableViewManager.tableView = tableView
     
-    let callbacks = TableViewManager<User, UserTableViewCell>.Callbacks(onSelectCell: nil) { [weak self] in
+    tableViewManager.callbacks.onScroll = { [weak self] in
       self?.searchBar.resignFirstResponder()
-    } onScrollToEnd: { [weak self] in
+    }
+    tableViewManager.callbacks.onScrollToEnd = { [weak self] in
       self?.viewModel.nextPage()
-    } onReceiveError: { [weak self] error in
+    }
+    tableViewManager.callbacks.onReceiveError = { [weak self] error in
+      self?.viewModel.isLoading.send(false)
       guard let error = error as? GithubError else { return }
       self?.coordinator?.presentAlert(message: error.description)
     }
-    tableViewManager.callbacks = callbacks
   }
   
 }
@@ -58,7 +94,7 @@ extension SearchUsersVC: UISearchBarDelegate {
   }
   
   func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-    viewModel.search.send(searchText)
+    search.send(searchText)
   }
   
 }
