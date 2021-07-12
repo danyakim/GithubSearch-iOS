@@ -44,16 +44,23 @@ class ResultsVM<Result: Codable> {
       }
       .store(in: &subscriptions)
   }
-
+  
   func setupSearch() {
     search
       .handleEvents(receiveOutput: { [weak self] _ in
         self?.results.value = []
       })
       .filter({ !$0.isEmpty })
+      .handleEvents(receiveOutput: { [weak self] _ in
+        if self?.page.value != 1 {
+          self?.page.send(1)
+        }
+      })
       .combineLatest(page)
+      .removeDuplicates(by: { previous, current in
+        previous.0 == current.0 && current.1 == 1
+      })
       .sink(receiveValue: { search, page in
-        print(search, page)
         self.getResults(for: search, page: page)
       })
       .store(in: &subscriptions)
