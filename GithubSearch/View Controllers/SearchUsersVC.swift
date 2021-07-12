@@ -59,7 +59,7 @@ class SearchUsersVC: UIViewController {
   }
   
   func setupViewModel() {
-    viewModel.startReacting()
+    viewModel.setupSearch()
     
     viewModel.isLoading
       .receive(on: DispatchQueue.main)

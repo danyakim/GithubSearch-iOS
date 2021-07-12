@@ -28,6 +28,7 @@ class ResultsVM<Result: Codable> {
   
   // MARK: - Methods
   func getResults(for string: String, page: Int = 1) {
+    self.isLoading.send(true)
     network.getResults(resultType: Result.self, for: string, on: page)
       .sink { [weak self] completion in
         if case let .failure(error) = completion {
@@ -44,17 +45,7 @@ class ResultsVM<Result: Codable> {
       .store(in: &subscriptions)
   }
 
-  func startReacting() {
-    page
-      .dropFirst()
-      .sink { [weak self] page in
-        guard let self = self else { return }
-        if page != 1,
-           self.totalCount <= self.results.value.count { return }
-        self.isLoading.send(true)
-      }
-      .store(in: &subscriptions)
-    
+  func setupSearch() {
     search
       .handleEvents(receiveOutput: { [weak self] _ in
         self?.results.value = []
@@ -62,12 +53,14 @@ class ResultsVM<Result: Codable> {
       .filter({ !$0.isEmpty })
       .combineLatest(page)
       .sink(receiveValue: { search, page in
+        print(search, page)
         self.getResults(for: search, page: page)
       })
       .store(in: &subscriptions)
   }
   
   func nextPage() {
+    guard self.totalCount > self.results.value.count else { return }
     page.value += 1
   }
   
