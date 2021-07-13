@@ -5,15 +5,14 @@
 //  Created by Daniil Kim on 05.07.2021.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 class ResultsVM<Result: Codable> {
   
   // MARK: - Properties
   private(set) var results = CurrentValueSubject<[Result], Error>([])
   private(set) var isLoading = PassthroughSubject<Bool, Never>()
-  
   private var search: AnyPublisher<String, Never>
   private var page = CurrentValueSubject<Int, Never>(1)
   private var totalCount = 0
@@ -29,25 +28,6 @@ class ResultsVM<Result: Codable> {
   }
   
   // MARK: - Methods
-  func getResults(for string: String, page: Int = 1) {
-    self.isLoading.send(true)
-    network.getResults(resultType: Result.self, for: string, on: page)
-      .sink { [weak self] completion in
-        if case let .failure(error) = completion {
-          self?.isLoading.send(false)
-          self?.results.send(completion: .failure(error))
-        }
-      } receiveValue: { [weak self] receivedResult in
-        guard let self = self,
-              let totalCount = receivedResult.totalCount,
-              let items = receivedResult.items else { return }
-        self.totalCount = totalCount
-        self.results.value += items
-        self.isLoading.send(false)
-      }
-      .store(in: &subscriptions)
-  }
-  
   func nextPage() {
     guard self.totalCount > self.results.value.count else { return }
     page.value += 1
@@ -67,12 +47,48 @@ class ResultsVM<Result: Codable> {
       })
       .combineLatest(page)
       .removeDuplicates(by: { previous, current in
-        previous.0 == current.0 && current.1 == 1
+        return previous.0 == current.0 && current.1 == 1
       })
-      .sink(receiveValue: { search, page in
-        self.getResults(for: search, page: page)
+      .flatMap({ [weak self] (search, page) -> AnyPublisher<SearchResult<Result>, GithubError> in
+        guard let self = self else { fatalError("no self in ", file: #function) }
+        self.isLoading.send(true)
+        return self.network.getResults(resultType: Result.self, for: search, on: page)
       })
+      .catch({ [weak self] error -> AnyPublisher<SearchResult<Result>, Never> in
+        self?.isLoading.send(false)
+        self?.results.send(completion: .failure(error))
+        return Just(SearchResult<Result>(totalCount: 0, items: []))
+          .eraseToAnyPublisher()
+      })
+      .compactMap { [weak self] (searchResult) -> [Result] in
+        guard let self = self,
+              let totalCount = searchResult.totalCount,
+              let items = searchResult.items else { return [] }
+        self.totalCount = totalCount
+        self.isLoading.send(false)
+        return self.results.value + items
+      }
+      .assign(to: \.value, on: results)
       .store(in: &subscriptions)
   }
   
+//  private func getResults(for string: String, page: Int = 1) {
+//    self.isLoading.send(true)
+//    network.getResults(resultType: Result.self, for: string, on: page)
+//      .sink { [weak self] completion in
+//        if case let .failure(error) = completion {
+//          self?.isLoading.send(false)
+//          self?.results.send(completion: .failure(error))
+//        }
+//      } receiveValue: { [weak self] receivedResult in
+//        guard let self = self,
+//              let totalCount = receivedResult.totalCount,
+//              let items = receivedResult.items else { return }
+//        self.totalCount = totalCount
+//        self.results.value += items
+//        self.isLoading.send(false)
+//      }
+//      .store(in: &subscriptions)
+//  }
+//
 }

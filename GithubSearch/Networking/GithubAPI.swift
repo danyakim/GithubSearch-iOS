@@ -44,7 +44,7 @@ class GithubAPI {
   
   // MARK: - Public methods
   public func getResults<T>(resultType: T.Type, for string: String, on page: Int)
-  -> Future<SearchResult<T>, GithubError> {
+  -> AnyPublisher<SearchResult<T>, GithubError> {
     return Future { [weak self] promise in
       guard let self = self else { return }
       
@@ -65,6 +65,7 @@ class GithubAPI {
         .dataTaskPublisher(for: url)
         .map(\.data)
         .decode(type: SearchResult.self, decoder: JSONDecoder())
+        .retry(1)
         .sink { completion in
           if case let .failure(error) = completion {
             switch error {
@@ -81,6 +82,7 @@ class GithubAPI {
         }
         .store(in: &self.subscriptions)
     }
+    .eraseToAnyPublisher()
   }
   
 }
